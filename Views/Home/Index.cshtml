@@ -1,0 +1,152 @@
+@{
+    ViewData["Title"] = "Terminal";
+    ViewData["HideNavigation"] = true;
+}
+
+<div class="landing-wrapper">
+    <!-- Atmospheric Background Elements -->
+    <div class="atmosphere-container">
+        <!-- Rotating circles -->
+        <div class="atmospheric-ring ring-1"></div>
+        <div class="atmospheric-ring ring-2"></div>
+        <div class="atmospheric-ring ring-3"></div>
+        
+        <!-- Pulsing dots -->
+        <div class="pulse-dot dot-1"></div>
+        <div class="pulse-dot dot-2"></div>
+        <div class="pulse-dot dot-3"></div>
+        <div class="pulse-dot dot-4"></div>
+        
+        <!-- SOS Signal (morse code visualizer) -->
+        <div class="sos-signal">
+            <div class="sos-dot"></div>
+            <div class="sos-dot"></div>
+            <div class="sos-dot"></div>
+            <div class="sos-dash"></div>
+            <div class="sos-dash"></div>
+            <div class="sos-dash"></div>
+            <div class="sos-dot"></div>
+            <div class="sos-dot"></div>
+            <div class="sos-dot"></div>
+        </div>
+        
+        <!-- Warning lights -->
+        <div class="warning-light light-1"></div>
+        <div class="warning-light light-2"></div>
+        <div class="warning-light light-3"></div>
+        
+        <!-- Static noise overlay -->
+        <div class="static-overlay"></div>
+    </div>
+
+    <!-- Main Content - Flex Column Layout -->
+    <div class="landing-content">
+        <!-- Header Section -->
+        <header class="landing-header">
+            <div class="system-badge">
+                <span class="badge-indicator"></span>
+                <span class="badge-text">SECURE CONNECTION</span>
+            </div>
+            <div class="coordinates">
+                <span>SECTOR: 7G-ALPHA</span>
+                <span>COORDS: 45.22.91</span>
+            </div>
+        </header>
+
+        <!-- Middle Section - Main Info -->
+        <main class="landing-main">
+            <div class="title-section">
+                <h1 class="landing-logo cursor">The Signal</h1>
+                <div class="landing-subtitle">Emergency Broadcast // Protocol: BLACK</div>
+            </div>
+
+            <div class="status-section">
+                <div class="terminal-card status-card">
+                    <div class="terminal-card-header">
+                        <span class="terminal-card-title">Critical Status Report</span>
+                        <span class="timestamp" id="status-timestamp">--:--:--</span>
+                    </div>
+                    <div class="terminal-card-body">
+                        <div class="status-grid">
+                            <div class="status-item">
+                                <span class="status-label">Vessel</span>
+                                <span class="status-value">USG Ishimura</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">Location</span>
+                                <span class="status-value accent">Aegis VII Orbit</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">Life Support</span>
+                                <span class="status-value warning">42% CRITICAL</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">Crew Status</span>
+                                <span class="status-value danger">997 UNKNOWN</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">Comms Array</span>
+                                <span class="status-value danger">OFFLINE</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">Threat Level</span>
+                                <span class="status-value critical">EXTREME</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="warning-message">
+                    <div class="warning-icon">⚠</div>
+                    <p class="warning-text">
+                        Distress beacon detected. Last transmission: 72 hours ago. 
+                        Multiple life signs detected but... wrong. They're all wrong.
+                        <span class="typing-text">Do not approach. Do not land. Run.</span>
+                    </p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Bottom Section - Call to Action -->
+        <footer class="landing-footer">
+            <div class="action-panel">
+                <div class="panel-line"></div>
+                <div class="landing-actions">
+                    <a href="#" class="terminal-btn primary large">
+                        <span class="btn-icon">▶</span>
+                        <span>Initialize Emergency Protocol</span>
+                        <span class="btn-cursor">_</span>
+                    </a>
+                    <a href="#" class="terminal-btn secondary large">
+                        <span class="btn-icon">◼</span>
+                        <span>Access Archived Logs</span>
+                    </a>
+                </div>
+                <div class="panel-line"></div>
+            </div>
+            
+            <div class="footer-info">
+                <div class="security-notice">
+                    <span class="notice-dot"></span>
+                    <span>UNAUTHORIZED ACCESS IS A FEDERAL OFFENSE</span>
+                </div>
+                <div class="protocol-info">
+                    <span>CONN: ENCRYPTED</span>
+                    <span>PROTOCOL: VOID-7-OMEGA</span>
+                    <span>SESSION: UNREGISTERED</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
+
+<script>
+    // Update timestamp
+    function updateTimestamp() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('en-US', { hour12: false });
+        document.getElementById('status-timestamp').textContent = timeString;
+    }
+    setInterval(updateTimestamp, 1000);
+    updateTimestamp();
+</script>

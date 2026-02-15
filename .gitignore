@@ -1,0 +1,35 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+.vscode/
+
+# Database
+*.db
+*.db-journal
+
+# Secrets
+appsettings.Development.json
+appsettings.Local.json
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+
+# NuGet
+*.nupkg
+packages/
+
+# Visual Studio
+testResults/
+[Tt]est[Rr]esult*/
+_ReSharper*/
+*.ReSharper
+*.DotSettings.user
+
+# Problematic files
+nul

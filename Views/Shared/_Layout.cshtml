@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - The Signal</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="terminal-frame">
+        <!-- Terminal Header -->
+        <header class="terminal-header">
+            <div class="terminal-title">The Signal</div>
+            <div class="terminal-status">
+                <span class="status-indicator">SYSTEM ONLINE</span>
+                <span id="clock">--:--:--</span>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <div class="terminal-main">
+            @if (ViewData["HideNavigation"] == null)
+            {
+                <!-- Sidebar Navigation -->
+                <nav class="terminal-nav">
+                    <div class="nav-section">
+                        <div class="nav-section-title">Main</div>
+                        <a class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")" 
+                           asp-controller="Home" asp-action="Index">
+                            Terminal
+                        </a>
+                        <a class="nav-item" href="#">Character</a>
+                        <a class="nav-item" href="#">Inventory</a>
+                        <a class="nav-item" href="#">Quests</a>
+                    </div>
+                    
+                    <div class="nav-section">
+                        <div class="nav-section-title">System</div>
+                        <a class="nav-item" href="#">Settings</a>
+                        <a class="nav-item" href="#">Logs</a>
+                    </div>
+                </nav>
+            }
+
+            <!-- Content -->
+            <main class="terminal-content" role="main">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Clock update
+        function updateClock() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', { hour12: false });
+            document.getElementById('clock').textContent = timeString;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

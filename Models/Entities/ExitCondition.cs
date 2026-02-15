@@ -1,0 +1,11 @@
+namespace ChroniclesOfTheVoid.Models.Entities;
+
+public class ExitCondition
+{
+    public int Id { get; set; }
+    public int LocationExitId { get; set; }
+    public LocationExit? LocationExit { get; set; }
+    
+    public string ConditionType { get; set; } = string.Empty;
+    public string ConditionValue { get; set; } = string.Empty;
+}
