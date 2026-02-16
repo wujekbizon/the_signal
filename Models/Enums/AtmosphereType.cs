@@ -1,4 +1,4 @@
-namespace ChroniclesOfTheVoid.Models.Enums;
+namespace TheSignal.Models.Enums;
 
 public enum AtmosphereType
 {

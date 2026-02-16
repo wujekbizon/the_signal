@@ -1,0 +1,284 @@
+@{
+    ViewData["Title"] = "Personnel Database";
+    ViewData["HideNavigation"] = true;
+}
+
+<link rel="stylesheet" href="~/css/archive.css" />
+
+<div class="archive-wrapper">
+    <header class="archive-header">
+        <div class="archive-title-section">
+            <h1 class="archive-title">// PERSONNEL DATABASE</h1>
+            <div class="archive-subtitle">SECURE ACCESS TERMINAL // LEVEL 4 CLEARANCE REQUIRED</div>
+        </div>
+        <div class="archive-stats">
+            <div class="archive-stat-box">
+                <span class="archive-stat-label">DB STATUS</span>
+                <span class="archive-stat-value status-online">ONLINE</span>
+            </div>
+            <div class="archive-stat-box">
+                <span class="archive-stat-label">TOTAL RECORDS</span>
+                <span class="archive-stat-value" id="totalRecords">005</span>
+            </div>
+            <div class="archive-stat-box">
+                <span class="archive-stat-label">ACTIVE</span>
+                <span class="archive-stat-value status-active" id="activeCount">02</span>
+            </div>
+            <div class="archive-stat-box">
+                <span class="archive-stat-label">LOST</span>
+                <span class="archive-stat-value status-lost" id="lostCount">03</span>
+            </div>
+        </div>
+    </header>
+    <div class="archive-container">
+        <div class="logs-grid">
+            <div class="logs-header">
+                <span class="col-id">ID</span>
+                <span class="col-name">PERSONNEL</span>
+                <span class="col-class">CLASS</span>
+                <span class="col-status">STATUS</span>
+                <span class="col-location">LAST KNOWN</span>
+                <span class="col-time">SURVIVED</span>
+            </div>
+            
+            <div id="logsContainer"></div>
+        </div>
+    </div>
+    <footer class="archive-footer">
+        <div class="footer-left">
+            <div class="footer-warning">
+                <span class="warning-icon">⚠</span>
+                <span>WARNING: Some records may be incomplete or corrupted. Data integrity not guaranteed.</span>
+            </div>
+        </div>
+        <a href="@Url.Action("Index", "Home")" class="terminal-btn secondary">
+            <span>← RETURN TO TERMINAL</span>
+        </a>
+    </footer>
+</div>
+<div id="logModal" class="log-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">PERSONNEL FILE // <span id="modalPersonnelId"></span></h2>
+            <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-grid">
+                <div class="modal-section">
+                    <div class="section-label">IDENTITY</div>
+                    <div class="modal-name" id="modalName"></div>
+                    <div class="modal-class" id="modalClass"></div>
+                </div>
+                
+                <div class="modal-section">
+                    <div class="section-label">STATUS</div>
+                    <div class="modal-status" id="modalStatus"></div>
+                    <div class="modal-health">
+                        <div class="health-bar">
+                            <div class="health-fill" id="healthFill"></div>
+                        </div>
+                        <span id="modalHealthText"></span>
+                    </div>
+                    <div class="modal-sanity">
+                        <div class="sanity-bar">
+                            <div class="sanity-fill" id="sanityFill"></div>
+                        </div>
+                        <span id="modalSanityText"></span>
+                    </div>
+                </div>
+                
+                <div class="modal-section full-width">
+                    <div class="section-label">MISSION SUMMARY</div>
+                    <div class="modal-summary" id="modalSummary"></div>
+                </div>
+                
+                <div class="modal-section">
+                    <div class="section-label">LOCATION DATA</div>
+                    <div class="modal-location" id="modalLocation"></div>
+                    <div class="modal-locations-found">
+                        Zones surveyed: <span id="modalLocationsCount"></span>
+                    </div>
+                </div>
+                
+                <div class="modal-section">
+                    <div class="section-label">TRANSMISSION LOG</div>
+                    <div class="modal-last-contact" id="modalLastContact"></div>
+                    <div class="modal-time" id="modalTime"></div>
+                </div>
+                
+                <div class="modal-section full-width">
+                    <div class="section-label">KEY EVENTS</div>
+                    <ul class="modal-events" id="modalEvents"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const logsData = [
+        {
+            Id: 1,
+            PersonnelId: "P-0001",
+            Name: "Marcus Holt",
+            ClassName: "Engineer",
+            Status: "Active",
+            CurrentLocation: "Engineering Deck - Sector 7",
+            LocationsDiscovered: 3,
+            Health: 85,
+            Sanity: 72,
+            BriefSummary: "Last confirmed position: Engineering Deck. Vital signs: Stable. Signal integrity degraded. Evidence collected.",
+            KeyEvents: ["Power fluctuations in Sector 7", "Strange markings on bulkhead", "Audio log fragment"],
+            LastTransmission: new Date(Date.now() - 7200000).toISOString(),
+            TimeSurvived: "5.2 days",
+            IsCorrupted: false
+        },
+        {
+            Id: 2,
+            PersonnelId: "P-0002",
+            Name: "Diana Rask",
+            ClassName: "SecurityOfficer",
+            Status: "MIA",
+            CurrentLocation: "Security Station - Deck 4",
+            LocationsDiscovered: 2,
+            Health: 45,
+            Sanity: 88,
+            BriefSummary: "Subject status: SEVERE INJURY DETECTED. Psychological profile: Acceptable. Recommend immediate extraction.",
+            KeyEvents: ["Weapon discharge residue", "Security footage gap", "Last transmission incomplete"],
+            LastTransmission: new Date(Date.now() - 21600000).toISOString(),
+            TimeSurvived: "3.1 days",
+            IsCorrupted: false
+        },
+        {
+            Id: 3,
+            PersonnelId: "P-0003",
+            Name: "Dr. Yusuf Okafor",
+            ClassName: "ScienceOfficer",
+            Status: "Corrupted",
+            CurrentLocation: "Research Lab - Xenobiology",
+            LocationsDiscovered: 4,
+            Health: 92,
+            Sanity: 25,
+            BriefSummary: "Subject status: Operational. Psychological profile: UNSTABLE. Communications stale. Recommend immediate extraction protocols.",
+            KeyEvents: ["Anomalous tissue samples", "Research notes - classified", "Biological contamination detected", "Unknown organism signature"],
+            LastTransmission: new Date(Date.now() - 86400000).toISOString(),
+            TimeSurvived: "7.0 days",
+            IsCorrupted: true
+        },
+        {
+            Id: 4,
+            PersonnelId: "P-0004",
+            Name: "Sgt. Cal Oduya",
+            ClassName: "Marine",
+            Status: "KIA",
+            CurrentLocation: "Last Stand - Airlock B",
+            LocationsDiscovered: 3,
+            Health: 0,
+            Sanity: 0,
+            BriefSummary: "Mission clock: 10.0 hours. Current threat level: EXTREME. Emergency beacon triggered. Distress call transcript recorded.",
+            KeyEvents: ["Last stand coordinates", "Emergency beacon triggered", "Distress call transcript"],
+            LastTransmission: new Date(Date.now() - 172800000).toISOString(),
+            TimeSurvived: "10.0 days",
+            IsCorrupted: false
+        },
+        {
+            Id: 5,
+            PersonnelId: "P-0005",
+            Name: "Kite",
+            ClassName: "Hacker",
+            Status: "Active",
+            CurrentLocation: "Server Room - Level 3",
+            LocationsDiscovered: 0,
+            Health: 100,
+            Sanity: 95,
+            BriefSummary: "Communications recent. Mission clock: 0.5 days. Awaiting transmission from subject.",
+            KeyEvents: ["Awaiting transmission"],
+            LastTransmission: new Date(Date.now() - 1800000).toISOString(),
+            TimeSurvived: "12.0 hours",
+            IsCorrupted: false
+        }
+    ];
+
+    function renderLogs() {
+        const container = document.getElementById('logsContainer');
+        
+        logsData.forEach(log => {
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${log.IsCorrupted ? 'corrupted' : ''}`;
+            entry.dataset.logId = log.Id;
+            
+            const displayName = log.IsCorrupted ? corruptName(log.Name) : log.Name;
+            
+            entry.innerHTML = `
+                <span class="col-id">${log.PersonnelId}</span>
+                <span class="col-name">${log.IsCorrupted ? `<span class="corrupted-text">${displayName}</span>` : displayName}</span>
+                <span class="col-class">${log.ClassName}</span>
+                <span class="col-status">
+                    <span class="status-badge status-${log.Status.toLowerCase()}">${log.Status.toUpperCase()}</span>
+                </span>
+                <span class="col-location">${log.CurrentLocation}</span>
+                <span class="col-time">${log.TimeSurvived}</span>
+            `;
+            
+            entry.addEventListener('click', () => openModal(log));
+            container.appendChild(entry);
+        });
+    }
+
+    function corruptName(name) {
+        const chars = name.split('');
+        for (let i = 0; i < Math.min(3, chars.length); i++) {
+            const pos = Math.floor(Math.random() * chars.length);
+            chars[pos] = '█';
+        }
+        return chars.join('');
+    }
+
+    function openModal(log) {
+        document.getElementById('modalPersonnelId').textContent = log.PersonnelId;
+        document.getElementById('modalName').textContent = log.Name;
+        document.getElementById('modalClass').textContent = log.ClassName;
+        document.getElementById('modalStatus').textContent = log.Status.toUpperCase();
+        document.getElementById('modalStatus').className = 'modal-status status-' + log.Status.toLowerCase();
+        document.getElementById('modalHealthText').textContent = log.Health + '%';
+        document.getElementById('healthFill').style.width = log.Health + '%';
+        document.getElementById('modalSanityText').textContent = log.Sanity + '%';
+        document.getElementById('sanityFill').style.width = log.Sanity + '%';
+        document.getElementById('modalSummary').textContent = log.BriefSummary;
+        document.getElementById('modalLocation').textContent = log.CurrentLocation;
+        document.getElementById('modalLocationsCount').textContent = log.LocationsDiscovered;
+        document.getElementById('modalLastContact').textContent = new Date(log.LastTransmission).toLocaleString();
+        document.getElementById('modalTime').textContent = 'Mission duration: ' + log.TimeSurvived;
+        
+        const eventsList = document.getElementById('modalEvents');
+        eventsList.innerHTML = '';
+        log.KeyEvents.forEach(event => {
+            const li = document.createElement('li');
+            li.textContent = '> ' + event;
+            eventsList.appendChild(li);
+        });
+        
+        document.getElementById('logModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('logModal').style.display = 'none';
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('logModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeModal();
+        }
+    });
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeModal();
+        }
+    });
+
+    // Initialize
+    renderLogs();
+</script>

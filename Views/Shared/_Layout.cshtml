@@ -8,7 +8,6 @@
 </head>
 <body>
     <div class="terminal-frame">
-        <!-- Terminal Header -->
         <header class="terminal-header">
             <div class="terminal-title">The Signal</div>
             <div class="terminal-status">
@@ -17,11 +16,9 @@
             </div>
         </header>
 
-        <!-- Main Content Area -->
         <div class="terminal-main">
             @if (ViewData["HideNavigation"] == null)
             {
-                <!-- Sidebar Navigation -->
                 <nav class="terminal-nav">
                     <div class="nav-section">
                         <div class="nav-section-title">Main</div>
@@ -41,8 +38,6 @@
                     </div>
                 </nav>
             }
-
-            <!-- Content -->
             <main class="terminal-content" role="main">
                 @RenderBody()
             </main>
@@ -50,7 +45,6 @@
     </div>
 
     <script>
-        // Clock update
         function updateClock() {
             const now = new Date();
             const timeString = now.toLocaleTimeString('en-US', { hour12: false });

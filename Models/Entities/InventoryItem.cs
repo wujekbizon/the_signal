@@ -1,4 +1,4 @@
-namespace ChroniclesOfTheVoid.Models.Entities;
+namespace TheSignal.Models.Entities;
 
 public class InventoryItem
 {

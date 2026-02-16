@@ -1,6 +1,6 @@
-using ChroniclesOfTheVoid.Models.Entities;
+using TheSignal.Models.Entities;
 
-namespace ChroniclesOfTheVoid.Repositories.Interfaces;
+namespace TheSignal.Repositories.Interfaces;
 
 public interface ICharacterRepository
 {

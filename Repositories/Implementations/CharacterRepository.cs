@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using ChroniclesOfTheVoid.Data;
-using ChroniclesOfTheVoid.Models.Entities;
-using ChroniclesOfTheVoid.Repositories.Interfaces;
+using TheSignal.Data;
+using TheSignal.Models.Entities;
+using TheSignal.Repositories.Interfaces;
 
-namespace ChroniclesOfTheVoid.Repositories.Implementations;
+namespace TheSignal.Repositories.Implementations;
 
 public class CharacterRepository : ICharacterRepository
 {

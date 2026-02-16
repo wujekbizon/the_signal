@@ -1,8 +1,8 @@
-using ChroniclesOfTheVoid.Models.Entities;
+using TheSignal.Models.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace ChroniclesOfTheVoid.Data;
+namespace TheSignal.Data;
 
 public class ApplicationDbContext : IdentityDbContext
 {

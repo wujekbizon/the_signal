@@ -218,27 +218,40 @@ dotnet ef migrations list
 - Registered both repositories in DI container (Program.cs)
 - Repositories abstract database access from controllers
 
-### ⏳ Phase 4: Gemini Client Service (PENDING)
-**Todo:**
-- Create IGeminiClient interface
-- Implement Google Gemini API client
-- Handle API authentication
-- Implement prompt builders
-- Add caching layer
+### ✅ Phase 4: Gemini Client Service (COMPLETED)
+**What was done:**
+- Created IGeminiClient interface
+- Implemented GeminiClient using Google.GenAI SDK
+- API authentication via appsettings (reads Gemini:ApiKey)
+- Configurable model, temperature, max tokens
+- Registered in DI container (Scoped)
+- User secrets configured for Development
 
-### ⏳ Phase 5: Narrative Service (PENDING)
-**Todo:**
-- Create INarrativeService interface
-- Implement context merging logic
-- Cache lookup before API calls
-- Store generated narratives in SQLite
+### ✅ Phase 5: Narrative Service (COMPLETED)
+**What was done:**
+- Created INarrativeService interface
+- Implemented NarrativeService with context merging (NarrativeContext.Create)
+- Cache lookup by ContextHash + LocationId before API calls
+- Stores generated narratives to GeneratedNarratives table
+- BuildPrompt() creates horror-themed prompts
+- Registered in DI container (Scoped)
 
-### ⏳ Phase 6: Game Controller (PENDING)
-**Todo:**
-- Create GameController with thin actions
-- Implement async Index action
-- Use ViewModels (not entities)
-- Max 3 dependencies, max 10 lines per action
+### ✅ Phase 6: Game Controller (COMPLETED)
+**What was done:**
+- Created GameController with 5 actions (Index, CharacterCreation, CreateCharacter, Move, Archive)
+- Uses 3 dependencies: ICharacterRepository, ILocationRepository, INarrativeService
+- All actions use ViewModels (CharacterCreationViewModel, GameSessionViewModel)
+- Thin action pattern: orchestration only, business logic in services
+- Private BuildGameSessionViewModel helper for entity-to-ViewModel mapping
+- Async/await throughout for database operations
+- Archive action created (ViewModel wiring pending in Phase 7c)
+
+**Actions:**
+- `Index(int characterId)` - Main game session view with narrative
+- `CharacterCreation()` - Class selection screen
+- `CreateCharacter(string name, CharacterClass characterClass)` - POST to create character
+- `Move(int characterId, int targetLocationId)` - Navigation between locations
+- `Archive()` - Archived logs view (Phase 7c)
 
 ### ✅ Phase 7: Landing Page UI (COMPLETED)
 **What was done:**
@@ -251,11 +264,39 @@ dotnet ef migrations list
 - Removed Bootstrap dependency, custom CSS only
 - Hot Reload configured in Visual Studio for rapid development
 
-### ⏳ Phase 7b: Game Interface Views (PENDING)
+### 🔄 Phase 7b: Character Creation UI (IN PROGRESS)
+**What we're building:**
+- Character creation screen with terminal/folder UI style
+- Left sidebar: class selection (9 classes from CharacterClass enum)
+- Right panel: class details, stats, name input
+- Proper MVC pattern implementation
+
+**Approach:**
+- Static class definitions (Models/GameData/ClassDefinitions.cs)
+- ViewModel for view data (CharacterCreationViewModel)
+- GameController passes ViewModel to view
+- View renders with minimal JS (UI state only)
+- POST saves Character entity with selected class to DB
+
+**Files:**
+- Models/ViewModels/CharacterCreationViewModel.cs
+- Models/GameData/ClassDefinitions.cs (static data)
+- Controllers/GameController.cs
+- Views/Game/CharacterCreation.cshtml
+
+### ⏳ Phase 7c: Archive/Progress View (PENDING)
 **Todo:**
-- Create game session views
-- Use ViewModels for data binding
-- No code-behind logic
+- "Access Archived Logs" view
+- Show previous character runs
+- Death logs, discoveries
+- Map placeholder
+
+### ⏳ Phase 7d: Game Session Views (PENDING)
+**Todo:**
+- Main game interface
+- Location display
+- Narrative rendering
+- Action buttons
 
 ### ⏳ Phase 8: Dependency Injection (PENDING)
 **Todo:**
@@ -322,9 +363,91 @@ dotnet ef migrations list
 - Typing cursor and text animations
 - "The Signal" branding - mysterious and evocative
 
+### 6.8 Static vs Dynamic Game Data
+**Decision**: Static data in code, dynamic data in database
+**Reason**:
+- **Static data** (class definitions, item templates, location templates): Hardcoded in static classes
+  - Never changes at runtime
+  - Faster access (no DB queries)
+  - Type-safe, compile-time checked
+  - Example: ClassDefinitions.cs with descriptions/stats
+- **Dynamic data** (player state, choices, progress): Stored in SQLite
+  - Changes during gameplay
+  - Player-specific (Character.CharacterClass, inventory, location)
+  - Needs persistence
+- Standard RPG pattern: DB stores "player chose Engineer", code defines "what Engineer means"
+
 ---
 
-## 7. FILE NAMING CONVENTIONS
+## 7. SECRETS MANAGEMENT
+
+### 7.1 Development Environment (User Secrets)
+
+**Setup** (one-time):
+```bash
+dotnet user-secrets init
+dotnet user-secrets set "Gemini:ApiKey" "YOUR_API_KEY_HERE"
+```
+
+**Verify**:
+```bash
+dotnet user-secrets list
+```
+
+**How it works:**
+- UserSecretsId configured in TheSignal.csproj
+- Secrets stored outside project directory (won't commit to Git)
+- appsettings.json has empty values (safe for GitHub)
+- Development environment auto-loads user secrets
+
+**Current secrets:**
+- `Gemini:ApiKey` - Google Gemini API key
+- `ConnectionStrings:DatabaseConnection` - Alternative DB connection
+
+### 7.2 Production Deployment
+
+**Options for production:**
+
+1. **Environment Variables** (Recommended for containers/cloud):
+   ```bash
+   # Linux/Mac
+   export Gemini__ApiKey="YOUR_API_KEY"
+
+   # Windows
+   set Gemini__ApiKey=YOUR_API_KEY
+
+   # Docker
+   docker run -e Gemini__ApiKey="YOUR_API_KEY" ...
+   ```
+
+2. **appsettings.Production.json** (server deployment):
+   ```json
+   {
+     "Gemini": {
+       "ApiKey": "YOUR_API_KEY"
+     }
+   }
+   ```
+   ⚠️ **NEVER commit this file** - add to .gitignore
+
+3. **Azure App Service**:
+   - Use Application Settings in Azure Portal
+   - Automatically overrides appsettings values
+   - Format: `Gemini:ApiKey` or `Gemini__ApiKey`
+
+4. **AWS/GCP**:
+   - Use AWS Secrets Manager / GCP Secret Manager
+   - Integrate via SDK or environment variables
+
+**Security checklist:**
+- ✅ appsettings.json has empty ApiKey
+- ✅ appsettings.Production.json in .gitignore (if used)
+- ✅ User secrets for local dev
+- ✅ Environment variables or cloud secrets for production
+
+---
+
+## 8. FILE NAMING CONVENTIONS
 
 **Classes**: PascalCase, one per file, filename matches class name
 ```
@@ -347,27 +470,27 @@ namespace ChroniclesOfTheVoid.Models.Enums;
 
 ---
 
-## 8. LESSONS LEARNED
+## 9. LESSONS LEARNED
 
-### 8.1 EF Core Migrations
+### 9.1 EF Core Migrations
 - Always delete old migrations when switching database providers (SQL Server → SQLite)
 - Use `dotnet ef migrations remove` to undo last migration
 - Shadow properties error = relationship configuration issue in OnModelCreating()
 - Two collections of same type on one entity causes EF confusion
 
-### 8.2 Code Organization
+### 9.2 Code Organization
 - One class per file is worth the extra files
 - Enums deserve their own files
 - Inline initializers are cleaner than constructors for POCOs
 - Fluent API (OnModelCreating) preferred over data annotations
 
-### 8.3 Theme Evolution
+### 9.3 Theme Evolution
 - Original: Fantasy RPG (Dungeon Master style)
 - Current: Sci-Fi Horror (Alien/Dead Space inspired)
 - Benefits: Better fit for paragraph-based tension, event-driven horror
 - "The Signal" evokes mystery and cosmic dread
 
-### 8.4 UI Development with Hot Reload
+### 9.4 UI Development with Hot Reload
 - Visual Studio Hot Reload on File Save works perfectly
 - Enable "Hot Reload on File Save" in toolbar dropdown
 - No need for `dotnet watch` when debugging in VS
@@ -375,25 +498,43 @@ namespace ChroniclesOfTheVoid.Models.Enums;
 - Razor view changes reload browser automatically
 - Use F5 (Start Debugging) not Ctrl+F5 for Hot Reload
 
+### 9.5 Secrets Management
+- Use `dotnet user-secrets` for development API keys
+- Never commit appsettings.Production.json with real keys
+- Keep appsettings.json values empty for GitHub safety
+- UserSecretsId auto-generated in .csproj
+- Production: use environment variables or cloud secret managers
+
+### 9.6 MVC Pattern for Game UI
+- Keep business logic out of views (no complex JS data objects in Razor)
+- Use ViewModels to pass data from Controller to View
+- Static game definitions belong in code, not DB or view
+- View JS should only handle UI state (active buttons, animations)
+- Follow separation: Controller builds data → ViewModel carries it → View displays it
+
 ---
 
-## 9. NEXT STEPS
+## 10. NEXT STEPS
 
 1. ✅ Phase 1 Complete (Domain Models)
 2. ✅ Phase 2 Complete (SQLite Setup)
 3. ✅ Phase 3 Complete (Repository Pattern)
-4. ✅ Phase 7a Complete (Landing Page UI)
-5. ⏳ Phase 4: Gemini API Integration
-6. ⏳ Phase 5: Narrative Generation Service
-7. ⏳ Phase 6: Game Controller
-8. ⏳ Phase 7b: Game Interface Views
-9. ⏳ Phase 8: Dependency Injection verification
+4. ✅ Phase 4 Complete (Gemini API Integration)
+5. ✅ Phase 5 Complete (Narrative Generation Service)
+6. ✅ Phase 6 Complete (Game Controller)
+7. ✅ Phase 7a Complete (Landing Page UI)
+8. ✅ Phase 7b Complete (Character Creation UI)
+9. 🔄 Phase 7c: Archive/Progress View (IN PROGRESS)
+10. ⏳ Phase 7d: Game Session Views
+11. ⏳ Phase 8: Dependency Injection verification
 
-**Status**: Backend architecture complete. Beautiful horror-themed landing page done. Ready for AI integration.
+**Status**: AI backend complete. Working on UI flow: character creation → game session. MVC pattern with static game data + dynamic player state.
 
 ---
 
-**Last Updated**: 2026-02-15
-**Current Phase**: Phase 4 - Gemini Client Service
+**Last Updated**: 2026-02-16
+**Current Phase**: Phase 7c - Archive/Progress View
 **Database**: SQLite (app.db) with 12 tables, Code-First approach
 **UI**: Dark sci-fi terminal theme with atmospheric effects
+**AI**: Gemini 2.5 Flash integrated, narrative generation with caching
+**Architecture**: Proper MVC - static definitions in code, player state in DB

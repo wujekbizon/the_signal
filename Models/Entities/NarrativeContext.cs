@@ -1,6 +1,6 @@
-using ChroniclesOfTheVoid.Models.Enums;
+using TheSignal.Models.Enums;
 
-namespace ChroniclesOfTheVoid.Models.Entities;
+namespace TheSignal.Models.Entities;
 
 public class NarrativeContext
 {

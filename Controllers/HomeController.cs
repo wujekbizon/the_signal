@@ -1,8 +1,8 @@
 using System.Diagnostics;
-using ChroniclesOfTheVoid.Models;
+using TheSignal.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ChroniclesOfTheVoid.Controllers
+namespace TheSignal.Controllers
 {
     public class HomeController : Controller
     {

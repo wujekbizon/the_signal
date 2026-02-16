@@ -1,0 +1,206 @@
+@model TheSignal.Models.ViewModels.CharacterCreationViewModel
+@{
+    ViewData["Title"] = "Character Creation";
+    ViewData["HideNavigation"] = true;
+}
+
+<link rel="stylesheet" href="~/css/character-creation.css" />
+
+<div class="landing-wrapper">
+    <!-- Atmospheric Background -->
+    <div class="atmosphere-container">
+        <div class="atmospheric-ring ring-1"></div>
+        <div class="atmospheric-ring ring-2"></div>
+        <div class="pulse-dot dot-1"></div>
+        <div class="pulse-dot dot-2"></div>
+        <div class="warning-light light-1"></div>
+        <div class="warning-light light-2"></div>
+        <div class="static-overlay"></div>
+    </div>
+
+    <!-- Main Terminal Interface -->
+    <div class="char-creation-container">
+        <!-- Header -->
+        <header class="char-creation-header">
+            <div class="system-badge">
+                <span class="badge-indicator"></span>
+                <span class="badge-text">PERSONNEL FILE // NEW RECRUIT</span>
+            </div>
+            <div class="coordinates">
+                <span>SESSION: CHAR_CREATE_01</span>
+                <span id="header-timestamp">--:--:--</span>
+            </div>
+        </header>
+
+        <!-- Main Content Area with Sidebar -->
+        <main class="char-creation-main">
+
+            <!-- Left Sidebar - Class Selection -->
+            <aside class="char-sidebar">
+                <div class="sidebar-label">CLASS ROSTER</div>
+                <div class="class-list">
+                    @for (int i = 0; i < Model.Classes.Count; i++)
+                    {
+                        var classInfo = Model.Classes[i];
+                        var isFirst = i == 0;
+                        <button class="class-item @(isFirst ? "active" : "")"
+                                data-class-index="@i"
+                                data-class-type="@classInfo.Type"
+                                data-image-path="@classInfo.ImagePath">
+                            <span class="class-icon">@classInfo.Icon</span>
+                            <span>@classInfo.Name</span>
+                        </button>
+                    }
+                </div>
+            </aside>
+
+            <!-- Right Panel - Character Details -->
+            <section class="char-details">
+                <div class="terminal-card">
+                    <div class="terminal-card-header">
+                        <span class="terminal-card-title" id="class-title">@Model.Classes[0].Name PROFILE</span>
+                    </div>
+                    <div class="terminal-card-body">
+
+                        <!--
+                            GRID:
+                            Row 1, Col 1: Portrait (tall, padded container)
+                            Row 1, Col 2: Bio + Specialization + Description
+                            Row 2, Col 1-2: Stats (horizontal 6-column grid)
+                        -->
+                        <div class="char-content-wrapper">
+
+                            <!-- ROW 1, COL 1: Portrait -->
+                            <div class="char-portrait-container" id="char-portrait">
+                                <img src="@Model.Classes[0].ImagePath"
+                                     alt="@Model.Classes[0].Name"
+                                     class="char-portrait" />
+                            </div>
+
+                            <!-- ROW 1, COL 2: Bio + Spec -->
+                            <div class="char-bio-spec-column">
+
+                                <div class="class-bio" id="class-bio">
+                                    @foreach (var line in Model.Classes[0].Bio.Split('\n'))
+                                    {
+                                        <p>@line</p>
+                                    }
+                                </div>
+
+                                <div class="char-specialization-section">
+                                    <div class="char-specialization">
+                                        <p class="text-accent">SPECIALIZATION: <span id="class-spec">@Model.Classes[0].Specialization</span></p>
+                                    </div>
+                                    <div class="class-description" id="class-description">
+                                        <p id="class-desc">@Model.Classes[0].Description</p>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <!-- end .char-bio-spec-column -->
+
+                            <!-- ROW 2, FULL WIDTH: Stats -->
+                            <div class="class-stats">
+                                <div class="stats-grid">
+                                    <div class="stat-item">
+                                        <span class="stat-label">TECHNICAL</span>
+                                        <div class="stat-bar-row">
+                                            <span class="stat-bar" id="stat-technical">@GenerateStatBar(10 + Model.Classes[0].TechnicalBonus)</span>
+                                            <span class="stat-value" id="stat-technical-val">@(10 + Model.Classes[0].TechnicalBonus)</span>
+                                        </div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-label">COMBAT</span>
+                                        <div class="stat-bar-row">
+                                            <span class="stat-bar" id="stat-combat">@GenerateStatBar(10 + Model.Classes[0].CombatBonus)</span>
+                                            <span class="stat-value" id="stat-combat-val">@(10 + Model.Classes[0].CombatBonus)</span>
+                                        </div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-label">MEDICAL</span>
+                                        <div class="stat-bar-row">
+                                            <span class="stat-bar" id="stat-medical">@GenerateStatBar(10 + Model.Classes[0].MedicalBonus)</span>
+                                            <span class="stat-value" id="stat-medical-val">@(10 + Model.Classes[0].MedicalBonus)</span>
+                                        </div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-label">SCIENCE</span>
+                                        <div class="stat-bar-row">
+                                            <span class="stat-bar" id="stat-science">@GenerateStatBar(10 + Model.Classes[0].ScienceBonus)</span>
+                                            <span class="stat-value" id="stat-science-val">@(10 + Model.Classes[0].ScienceBonus)</span>
+                                        </div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-label">STEALTH</span>
+                                        <div class="stat-bar-row">
+                                            <span class="stat-bar" id="stat-stealth">@GenerateStatBar(10 + Model.Classes[0].StealthBonus)</span>
+                                            <span class="stat-value" id="stat-stealth-val">@(10 + Model.Classes[0].StealthBonus)</span>
+                                        </div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-label">LEADERSHIP</span>
+                                        <div class="stat-bar-row">
+                                            <span class="stat-bar" id="stat-leadership">@GenerateStatBar(10 + Model.Classes[0].LeadershipBonus)</span>
+                                            <span class="stat-value" id="stat-leadership-val">@(10 + Model.Classes[0].LeadershipBonus)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- end .stats-grid -->
+                            </div>
+                            <!-- end .class-stats -->
+
+                        </div>
+                        <!-- end .char-content-wrapper -->
+
+                        <!-- Nickname Input -->
+                        <div class="terminal-form-group mt-lg">
+                            <label class="terminal-label">CALLSIGN / NICKNAME</label>
+                            <input type="text"
+                                   class="terminal-input"
+                                   id="character-nickname"
+                                   placeholder="Enter callsign..."
+                                   maxlength="20">
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="char-actions mt-lg">
+                            <button class="terminal-btn primary large" id="start-mission-btn">
+                                <span class="btn-icon">▶</span>
+                                <span>DEPLOY TO MISSION</span>
+                            </button>
+                        </div>
+
+                    </div>
+                    <!-- end .terminal-card-body -->
+                </div>
+                <!-- end .terminal-card -->
+            </section>
+
+        </main>
+
+        <!-- Footer Status Bar -->
+        <footer class="char-creation-footer">
+            <div class="footer-status">
+                <span>↑↓: SELECT CLASS</span>
+                <span>|</span>
+                <span>ENTER: CONFIRM</span>
+                <span>|</span>
+                <span>ESC: ABORT</span>
+            </div>
+        </footer>
+    </div>
+</div>
+
+@functions {
+    string GenerateStatBar(int value)
+    {
+        int filled = value / 10;
+        int empty = 10 - filled;
+        return new string('█', filled) + new string('░', empty);
+    }
+}
+
+<script>
+    window.classData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Classes));
+</script>
+<script src="~/js/character-creation.js"></script>

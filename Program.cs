@@ -1,6 +1,9 @@
-using ChroniclesOfTheVoid.Data;
-using ChroniclesOfTheVoid.Repositories.Interfaces;
-using ChroniclesOfTheVoid.Repositories.Implementations;
+using TheSignal.Data;
+using TheSignal.Repositories.Interfaces;
+using TheSignal.Repositories.Implementations;
+using TheSignal.Services;
+using TheSignal.Services.Interfaces;
+using TheSignal.Services.Implementations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,6 +22,10 @@ builder.Services.AddControllersWithViews();
 // Register Repositories
 builder.Services.AddScoped<ILocationRepository, LocationRepository>();
 builder.Services.AddScoped<ICharacterRepository, CharacterRepository>();
+
+// Register Services
+builder.Services.AddScoped<IGeminiClient, GeminiClient>();
+builder.Services.AddScoped<INarrativeService, NarrativeService>();
 
 var app = builder.Build();
 

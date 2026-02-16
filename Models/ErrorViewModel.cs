@@ -1,4 +1,4 @@
-namespace ChroniclesOfTheVoid.Models
+namespace TheSignal.Models
 {
     public class ErrorViewModel
     {
