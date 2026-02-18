@@ -1,0 +1,338 @@
+@model TheSignal.Controllers.AudioLogPlayViewModel
+@{
+    ViewData["Title"] = $"Personal Log - {Model.Speaker}";
+    ViewData["HideNavigation"] = true;
+}
+
+<link rel="stylesheet" href="~/css/audio-logs.css" />
+
+<div class="log-reader-container">
+    <!-- CRT Scanline Effect -->
+    <div class="crt-overlay"></div>
+    <div class="scanlines"></div>
+
+    <!-- Header -->
+    <header class="log-header">
+        <div class="header-left">
+            <a href="@Url.Action("Index", "AudioLog", new { characterId = Model.CharacterId })" class="nav-btn back">
+                <span class="nav-icon">←</span>
+                <span class="nav-text">ARCHIVE</span>
+            </a>
+        </div>
+        <div class="header-center">
+            <div class="log-meta-header">
+                <span class="meta-badge classification">CLASS: PERSONAL</span>
+                <span class="meta-badge timestamp">T+@Model.Day DAYS</span>
+            </div>
+        </div>
+        <div class="header-right"></div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="log-content">
+        <!-- Tape Deck Visualization -->
+        <div class="tape-deck">
+            <div class="deck-header">
+                <div class="deck-status">
+                    <span class="status-light @(Model.HasAudio ? "recording" : "standby")"></span>
+                    <span class="status-text">@(Model.HasAudio ? "PLAYBACK READY" : "TRANSCRIPT MODE")</span>
+                </div>
+                <div class="deck-counter">LOG #@Model.LogId</div>
+            </div>
+
+            <div class="tape-visual">
+                <div class="cassette-body">
+                    <div class="tape-reel left">
+                        <div class="reel-spool"></div>
+                    </div>
+                    <div class="tape-window">
+                        <div class="tape-label">
+                            <span class="label-text">@Model.Title</span>
+                            <span class="label-speaker">@Model.Speaker</span>
+                        </div>
+                    </div>
+                    <div class="tape-reel right">
+                        <div class="reel-spool"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Audio Controls (if has audio) -->
+            @if (Model.HasAudio)
+            {
+                <div class="audio-controls">
+                    <button class="control-btn rewind" onclick="rewind()" title="Rewind">⏮</button>
+                    <button class="control-btn play-pause" id="playBtn" onclick="togglePlay()" title="Play/Pause">▶</button>
+                    <button class="control-btn forward" onclick="forward()" title="Fast Forward">⏭</button>
+
+                    <div class="progress-container">
+                        <div class="time-elapsed" id="timeElapsed">00:00</div>
+                        <div class="progress-track">
+                            <div class="progress-bar" id="progressBar">
+                                <div class="progress-handle"></div>
+                            </div>
+                        </div>
+                        <div class="time-total" id="timeTotal">@Model.Duration.ToString(@"mm\:ss", System.Globalization.CultureInfo.InvariantCulture)</div>
+                    </div>
+
+                    <div class="volume-control">
+                        <span class="volume-icon">🔊</span>
+                        <input type="range" class="volume-slider" min="0" max="100" value="80" id="volumeSlider">
+                    </div>
+                </div>
+
+                <audio id="audioPlayer" preload="metadata">
+                    <source src="@Model.AudioUrl" type="audio/mpeg">
+                </audio>
+            }
+            else
+            {
+                <div class="transcript-notice">
+                    <div class="notice-icon">📋</div>
+                    <div class="notice-content">
+                        <strong>AUDIO UNAVAILABLE</strong>
+                        <span>Original recording corrupted or degraded. Reading from backup transcript.</span>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Transcript Panel -->
+        <div class="transcript-panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <span class="panel-icon">📝</span>
+                    <span>TRANSCRIPT</span>
+                </div>
+                @if (Model.HasAudio)
+                {
+                    <button class="sync-btn" id="syncBtn" onclick="toggleSync()" title="Auto-scroll with audio">
+                        <span class="sync-icon">🔗</span>
+                        <span class="sync-text">SYNC</span>
+                    </button>
+                }
+            </div>
+
+            <div class="transcript-scroll" id="transcriptScroll">
+                <div class="transcript-text" id="transcriptText">
+                    @Html.Raw(FormatTranscript(Model.Transcript))
+                </div>
+            </div>
+
+            <div class="panel-footer">
+                <div class="speaker-info">
+                    <span class="speaker-label">SPEAKER:</span>
+                    <span class="speaker-name">@Model.Speaker</span>
+                </div>
+                <div class="entry-info">
+                    <span class="entry-date">Day @Model.Day</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer Actions -->
+    <footer class="log-footer">
+        <a href="@Url.Action("Index", "Game", new { characterId = Model.CharacterId })" class="action-btn return">
+            <span class="btn-icon">↩</span>
+            <span class="btn-text">RETURN TO GAME</span>
+        </a>
+    </footer>
+</div>
+
+@section Scripts {
+    <script>
+        // Audio player state
+        let isPlaying = false;
+        let isSynced = true;
+        let audioPlayer = null;
+        let playBtn = null;
+        let progressBar = null;
+        let timeElapsed = null;
+        let animationId = null;
+
+        // Initialize on DOM ready
+        document.addEventListener('DOMContentLoaded', function() {
+            audioPlayer = document.getElementById('audioPlayer');
+            playBtn = document.getElementById('playBtn');
+            progressBar = document.getElementById('progressBar');
+            timeElapsed = document.getElementById('timeElapsed');
+
+            if (audioPlayer) {
+                // Audio event listeners
+                audioPlayer.addEventListener('timeupdate', updateProgress);
+                audioPlayer.addEventListener('ended', onAudioEnded);
+                audioPlayer.addEventListener('loadedmetadata', function() {
+                    document.getElementById('timeTotal').textContent = formatTime(audioPlayer.duration);
+                });
+
+                // Progress bar click
+                document.querySelector('.progress-track')?.addEventListener('click', function(e) {
+                    const rect = this.getBoundingClientRect();
+                    const pos = (e.clientX - rect.left) / rect.width;
+                    audioPlayer.currentTime = pos * audioPlayer.duration;
+                });
+
+                // Volume control
+                document.getElementById('volumeSlider')?.addEventListener('input', function(e) {
+                    audioPlayer.volume = e.target.value / 100;
+                });
+            }
+
+            // Animate tape reels
+            animateReels();
+        });
+
+        function togglePlay() {
+            if (!audioPlayer) return;
+
+            if (isPlaying) {
+                audioPlayer.pause();
+                playBtn.innerHTML = '▶';
+                playBtn.classList.remove('playing');
+                stopReelAnimation();
+            } else {
+                audioPlayer.play();
+                playBtn.innerHTML = '⏸';
+                playBtn.classList.add('playing');
+                startReelAnimation();
+            }
+            isPlaying = !isPlaying;
+        }
+
+        function rewind() {
+            if (!audioPlayer) return;
+            audioPlayer.currentTime = Math.max(0, audioPlayer.currentTime - 10);
+        }
+
+        function forward() {
+            if (!audioPlayer) return;
+            audioPlayer.currentTime = Math.min(audioPlayer.duration, audioPlayer.currentTime + 10);
+        }
+
+        function updateProgress() {
+            if (!audioPlayer || !progressBar) return;
+
+            const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+            progressBar.style.width = progress + '%';
+
+            if (timeElapsed) {
+                timeElapsed.textContent = formatTime(audioPlayer.currentTime);
+            }
+
+            // Auto-scroll transcript if synced
+            if (isSynced) {
+                scrollToCurrentTime();
+            }
+        }
+
+        function onAudioEnded() {
+            isPlaying = false;
+            if (playBtn) {
+                playBtn.innerHTML = '▶';
+                playBtn.classList.remove('playing');
+            }
+            stopReelAnimation();
+        }
+
+        function toggleSync() {
+            isSynced = !isSynced;
+            const btn = document.getElementById('syncBtn');
+            if (btn) {
+                btn.classList.toggle('active', isSynced);
+            }
+        }
+
+        function scrollToCurrentTime() {
+            // Simple auto-scroll based on progress
+            const scrollContainer = document.getElementById('transcriptScroll');
+            const text = document.getElementById('transcriptText');
+            if (scrollContainer && text && audioPlayer) {
+                const progress = audioPlayer.currentTime / audioPlayer.duration;
+                scrollContainer.scrollTop = progress * (text.scrollHeight - scrollContainer.clientHeight);
+            }
+        }
+
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return '00:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Reel animation
+        let reelAnimationId = null;
+        let reelRotation = 0;
+
+        function animateReels() {
+            const reels = document.querySelectorAll('.reel-spool');
+            if (reels.length === 0) return;
+
+            function step() {
+                if (isPlaying) {
+                    reelRotation += 2;
+                    reels.forEach(reel => {
+                        reel.style.transform = `rotate(${reelRotation}deg)`;
+                    });
+                }
+                reelAnimationId = requestAnimationFrame(step);
+            }
+            reelAnimationId = requestAnimationFrame(step);
+        }
+
+        function startReelAnimation() {
+            // Animation is handled in animateReels
+        }
+
+        function stopReelAnimation() {
+            // Animation continues but rotation stops incrementing
+        }
+    </script>
+}
+
+@functions {
+    string FormatTranscript(string transcript)
+    {
+        if (string.IsNullOrEmpty(transcript)) return string.Empty;
+
+        var lines = transcript.Split('\n');
+        var formatted = new System.Text.StringBuilder();
+        int lineIndex = 0;
+
+        foreach (var line in lines)
+        {
+            var trimmed = line.Trim();
+            if (string.IsNullOrEmpty(trimmed))
+            {
+                continue;
+            }
+            else if (trimmed.StartsWith("[") && trimmed.EndsWith("]"))
+            {
+                // Stage directions / context
+                formatted.AppendLine($"<div class=\"transcript-entry context\" data-time=\"{lineIndex}\">");
+                formatted.AppendLine($"<span class=\"entry-marker\">■</span>");
+                formatted.AppendLine($"<span class=\"entry-text context-text\">{trimmed}</span>");
+                formatted.AppendLine($"</div>");
+            }
+            else if (trimmed.StartsWith("(") && trimmed.EndsWith(")"))
+            {
+                // Sound effects
+                formatted.AppendLine($"<div class=\"transcript-entry sound\" data-time=\"{lineIndex}\">");
+                formatted.AppendLine($"<span class=\"entry-marker\">♪</span>");
+                formatted.AppendLine($"<span class=\"entry-text sound-text\">{trimmed}</span>");
+                formatted.AppendLine($"</div>");
+            }
+            else
+            {
+                // Speech
+                formatted.AppendLine($"<div class=\"transcript-entry speech\" data-time=\"{lineIndex}\">");
+                formatted.AppendLine($"<span class=\"entry-marker\">◆</span>");
+                formatted.AppendLine($"<span class=\"entry-text speech-text\">{trimmed}</span>");
+                formatted.AppendLine($"</div>");
+            }
+            lineIndex++;
+        }
+
+        return formatted.ToString();
+    }
+}

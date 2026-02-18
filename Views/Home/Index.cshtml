@@ -48,9 +48,10 @@
                 <span class="badge-text">SECURE CONNECTION</span>
             </div>
             <div class="coordinates">
-                <span>SECTOR: 7G-ALPHA</span>
-                <span>COORDS: 45.22.91</span>
+                <span>SECTOR: KUIPER BELT</span>
+                <span>COORDS: CX-419</span>
             </div>
+            <a href="#" class="settings-link" onclick="openSettings(); return false;">Settings</a>
         </header>
 
         <!-- Middle Section - Main Info -->
@@ -70,27 +71,27 @@
                         <div class="status-grid">
                             <div class="status-item">
                                 <span class="status-label">Vessel</span>
-                                <span class="status-value">USG Ishimura</span>
+                                <span class="status-value">Outpost Theta-7</span>
                             </div>
                             <div class="status-item">
                                 <span class="status-label">Location</span>
-                                <span class="status-value accent">Aegis VII Orbit</span>
+                                <span class="status-value accent">Kuiper Belt</span>
                             </div>
                             <div class="status-item">
                                 <span class="status-label">Life Support</span>
-                                <span class="status-value warning">42% CRITICAL</span>
+                                <span class="status-value warning">34% CRITICAL</span>
                             </div>
                             <div class="status-item">
                                 <span class="status-label">Crew Status</span>
-                                <span class="status-value danger">997 UNKNOWN</span>
+                                <span class="status-value danger">47 UNKNOWN</span>
                             </div>
                             <div class="status-item">
                                 <span class="status-label">Comms Array</span>
-                                <span class="status-value danger">OFFLINE</span>
+                                <span class="status-value danger">DESTROYED</span>
                             </div>
                             <div class="status-item">
-                                <span class="status-label">Threat Level</span>
-                                <span class="status-value critical">EXTREME</span>
+                                <span class="status-label">Signal Status</span>
+                                <span class="status-value critical">INTEGRATING</span>
                             </div>
                         </div>
                     </div>
@@ -99,9 +100,9 @@
                 <div class="warning-message">
                     <div class="warning-icon">⚠</div>
                     <p class="warning-text">
-                        Distress beacon detected. Last transmission: 72 hours ago. 
-                        Multiple life signs detected but... wrong. They're all wrong.
-                        <span class="typing-text">Do not approach. Do not land. Run.</span>
+                        Last transmission: 47 days ago. Containment Vessel CX-419 breached.
+                        Crew transforming. Signal integrating with station systems.
+                        <span class="typing-text">Do not approach. Do not land. They're building.</span>
                     </p>
                 </div>
             </div>
@@ -149,4 +150,15 @@
     }
     setInterval(updateTimestamp, 1000);
     updateTimestamp();
+
+    // Play main theme on first interaction
+    let themeStarted = false;
+    function startMainTheme() {
+        if (!themeStarted && window.audioManager) {
+            window.audioManager.playMusic('/audio/The Signal - Main Theme.mp3', true, true);
+            themeStarted = true;
+        }
+    }
+    document.addEventListener('click', startMainTheme, { once: true });
+    document.addEventListener('keydown', startMainTheme, { once: true });
 </script>

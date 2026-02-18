@@ -72,7 +72,7 @@ body::before {
 
 
 .terminal-frame {
-  height: 100%;
+  min-height: 100%;
   display: flex;
   flex-direction: column;
   border: 2px solid var(--border-accent);
@@ -352,18 +352,18 @@ p {
 }
 
 .landing-wrapper {
-  position: relative;
-  height: 100%;
-  overflow: hidden;
+    position: relative;
+    min-height: calc(100vh - 120px);
+    overflow: hidden;
 }
 
 .landing-content {
-  display: flex;
-  flex-direction: column;
-  min-height: 100%;
-  padding: var(--space-lg);
-  position: relative;
-  z-index: 10;
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 120px);
+    padding: var(--space-lg);
+    position: relative;
+    z-index: 10;
 }
 
 .landing-header {
@@ -1129,6 +1129,132 @@ p {
   padding: var(--space-lg);
 }
 
+/* Settings Modal Styles */
+.settings-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+}
+
+.settings-modal.active {
+  display: flex;
+}
+
+.settings-panel {
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-accent);
+  padding: var(--space-xl);
+  min-width: 350px;
+  max-width: 450px;
+}
+
+.settings-title {
+  color: #ff6b6b;
+  font-size: 1.3em;
+  margin-bottom: var(--space-lg);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.setting-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-lg);
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.setting-label {
+  color: var(--text-muted);
+  font-size: 0.9em;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.setting-control {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.volume-slider {
+  width: 120px;
+  height: 4px;
+  background: var(--border-primary);
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  background: #ff6b6b;
+  cursor: pointer;
+}
+
+.volume-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  background: #ff6b6b;
+  cursor: pointer;
+  border: none;
+}
+
+.mute-btn {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-accent);
+  color: var(--text-muted);
+  padding: var(--space-xs) var(--space-md);
+  cursor: pointer;
+  font-size: 0.8em;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.mute-btn:hover {
+  border-color: #ff6b6b;
+  color: #ff6b6b;
+}
+
+.mute-btn.muted {
+  background: #ff6b6b;
+  color: var(--bg-primary);
+  border-color: #ff6b6b;
+}
+
+.close-settings {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-accent);
+  color: var(--text-secondary);
+  padding: var(--space-sm) var(--space-lg);
+  cursor: pointer;
+  margin-top: var(--space-sm);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.85em;
+}
+
+.close-settings:hover {
+  background: var(--border-primary);
+  color: var(--text-bright);
+}
+
+.volume-value {
+  color: #ff6b6b;
+  font-size: 0.8em;
+  min-width: 35px;
+  text-align: right;
+}
+
 .modal-content {
   background: var(--bg-secondary);
   border: 2px solid var(--border-accent);
@@ -1304,4 +1430,21 @@ p {
   .modal-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* Settings Link in Landing Header */
+.settings-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.8em;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border: 1px solid var(--border-primary);
+  padding: var(--space-xs) var(--space-md);
+  transition: all 0.2s ease;
+}
+
+.settings-link:hover {
+  color: var(--accent-purple);
+  border-color: var(--accent-purple);
 }

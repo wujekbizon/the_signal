@@ -33,7 +33,7 @@
                     
                     <div class="nav-section">
                         <div class="nav-section-title">System</div>
-                        <a class="nav-item" href="#">Settings</a>
+                        <a class="nav-item" href="#" onclick="openSettings(); return false;">Settings</a>
                         <a class="nav-item" href="#">Logs</a>
                     </div>
                 </nav>
@@ -41,6 +41,46 @@
             <main class="terminal-content" role="main">
                 @RenderBody()
             </main>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="settings-modal">
+        <div class="settings-panel">
+            <div class="settings-title">/// AUDIO SETTINGS</div>
+            
+            <div class="setting-row">
+                <span class="setting-label">Master Volume</span>
+                <div class="setting-control">
+                    <input type="range" id="masterVolume" class="volume-slider" min="0" max="100" value="30">
+                    <span class="volume-value" id="masterValue">30%</span>
+                </div>
+            </div>
+            
+            <div class="setting-row">
+                <span class="setting-label">Music Volume</span>
+                <div class="setting-control">
+                    <input type="range" id="musicVolume" class="volume-slider" min="0" max="100" value="70">
+                    <span class="volume-value" id="musicValue">70%</span>
+                </div>
+            </div>
+            
+            <div class="setting-row">
+                <span class="setting-label">SFX Volume</span>
+                <div class="setting-control">
+                    <input type="range" id="sfxVolume" class="volume-slider" min="0" max="100" value="80">
+                    <span class="volume-value" id="sfxValue">80%</span>
+                </div>
+            </div>
+            
+            <div class="setting-row">
+                <span class="setting-label">Mute All</span>
+                <div class="setting-control">
+                    <button id="muteBtn" class="mute-btn" onclick="toggleMute()">OFF</button>
+                </div>
+            </div>
+            
+            <button class="close-settings" onclick="closeSettings()">Close</button>
         </div>
     </div>
 
@@ -54,6 +94,8 @@
         updateClock();
     </script>
 
+    <script src="~/js/audioManager.js" asp-append-version="true"></script>
+    <script src="~/js/settings.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

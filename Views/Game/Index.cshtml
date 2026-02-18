@@ -1,0 +1,558 @@
+@model TheSignal.Models.ViewModels.GameSessionViewModel
+@using TheSignal.Models.Enums
+@{
+    ViewData["Title"] = "The Signal - " + Model.LocationName;
+    ViewData["HideNavigation"] = true;
+}
+
+<link rel="stylesheet" href="~/css/game-session.css" />
+<link rel="stylesheet" href="~/css/modal.css" />
+
+<div class="game-container">
+    <!-- Atmospheric Background -->
+    <div class="atmosphere-container">
+        <div class="static-overlay"></div>
+        <div class="scanlines"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="game-header">
+        <div class="header-left">
+            <div class="character-badge">
+                <span class="class-icon">⚙</span>
+                <span class="character-name">@Model.CharacterName</span>
+                <span class="character-class">@Model.CharacterClass</span>
+            </div>
+        </div>
+        <div class="header-center">
+            <div class="location-badge">
+                <span class="location-label">LOCATION</span>
+                <span class="location-name">@Model.LocationName</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="story-beat">
+                <span class="beat-label">STORY BEAT</span>
+                <span class="beat-name">@FormatBeatName(Model.CurrentStoryBeat)</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="game-main">
+        <!-- Left Panel: Stats & Inventory -->
+        <aside class="left-panel">
+            <!-- Vital Stats -->
+            <div class="panel-section">
+                <h3 class="panel-title">VITAL SIGNS</h3>
+                <div class="stat-bar-container">
+                    <div class="stat-row">
+                        <span class="stat-label">HEALTH</span>
+                        <div class="stat-bar-bg">
+                            <div class="stat-bar-fill health" style="width: @(Model.Health)%"></div>
+                        </div>
+                        <span class="stat-value">@Model.Health/@Model.MaxHealth</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">OXYGEN</span>
+                        <div class="stat-bar-bg">
+                            <div class="stat-bar-fill oxygen" style="width: @(Model.Oxygen)%"></div>
+                        </div>
+                        <span class="stat-value">@Model.Oxygen/@Model.MaxOxygen</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">SANITY</span>
+                        <div class="stat-bar-bg">
+                            <div class="stat-bar-fill sanity" style="width: @(Model.Sanity)%"></div>
+                        </div>
+                        <span class="stat-value">@Model.Sanity/@Model.MaxSanity</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Character Stats -->
+            <div class="panel-section">
+                <h3 class="panel-title">ABILITIES</h3>
+                <div class="abilities-grid">
+                    <div class="ability-item">
+                        <span class="ability-name">TECH</span>
+                        <span class="ability-value">@Model.Technical</span>
+                    </div>
+                    <div class="ability-item">
+                        <span class="ability-name">COMBAT</span>
+                        <span class="ability-value">@Model.Combat</span>
+                    </div>
+                    <div class="ability-item">
+                        <span class="ability-name">MED</span>
+                        <span class="ability-value">@Model.Medical</span>
+                    </div>
+                    <div class="ability-item">
+                        <span class="ability-name">SCI</span>
+                        <span class="ability-value">@Model.Science</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inventory -->
+            <div class="panel-section">
+                <h3 class="panel-title">INVENTORY</h3>
+                <div class="inventory-list">
+                    @foreach (var item in Model.Inventory)
+                    {
+                        <div class="inventory-item" title="@item.Description">
+                            <span class="item-icon">@GetItemIcon(item.Type)</span>
+                            <span class="item-name">@item.Name</span>
+                            @if (item.Quantity > 1)
+                            {
+                                <span class="item-quantity">x@(item.Quantity)</span>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </aside>
+
+        <!-- Center Panel: Narrative & Location -->
+        <section class="center-panel">
+            <!-- Story Event (Opening or Beat Advancement) -->
+            @if (!string.IsNullOrEmpty(Model.OpeningNarrative))
+            {
+                <div class="narrative-box opening-narrative">
+                    <div class="narrative-header">
+                        <span class="pulse-indicator"></span>
+                        <span>STORY EVENT</span>
+                    </div>
+                    <div class="narrative-content">
+                        @Html.Raw(FormatNarrative(Model.OpeningNarrative))
+                    </div>
+                </div>
+            }
+
+            <!-- Error Messages -->
+            @if (TempData["Error"] != null)
+            {
+                <div class="narrative-box error-message">
+                    <div class="narrative-header">
+                        <span class="error-indicator">⚠</span>
+                        <span>ACCESS DENIED</span>
+                    </div>
+                    <div class="narrative-content">
+                        @TempData["Error"]
+                    </div>
+                </div>
+            }
+
+            <!-- Synthesized Location Narrative -->
+            @if (!string.IsNullOrEmpty(Model.NarrativeText))
+            {
+                <div class="location-narrative-container">
+                    <div class="narrative-box location-narrative">
+                        <div class="narrative-content synthesized" id="narrative-content">
+                            @Html.Raw(Model.ParsedNarrativeHtml)
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <!-- Fallback: Show structured sections if no AI narrative available -->
+                <div class="location-container">
+                    <div class="location-section visual">
+                        <h3 class="section-title">
+                            <span class="section-icon">👁</span>
+                            VISUAL
+                        </h3>
+                        <div class="section-content">
+                            @Model.LocationVisual
+                        </div>
+                    </div>
+
+                    <div class="location-section audio">
+                        <h3 class="section-title">
+                            <span class="section-icon">🔊</span>
+                            AUDIO
+                        </h3>
+                        <div class="section-content">
+                            @Model.LocationAudio
+                        </div>
+                    </div>
+
+                    <div class="location-section atmosphere">
+                        <h3 class="section-title">
+                            <span class="section-icon">🌡</span>
+                            ATMOSPHERE
+                        </h3>
+                        <div class="section-content">
+                            @Model.LocationAtmosphere
+                        </div>
+                    </div>
+
+                    <div class="location-section psychological">
+                        <h3 class="section-title">
+                            <span class="section-icon">🧠</span>
+                            PSYCHOLOGICAL
+                        </h3>
+                        <div class="section-content">
+                            @Model.LocationPsychological
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Interactables - Only show discovered ones -->
+            <div class="interactables-section" id="interactables-section">
+                <h3 class="section-title">INTERACTABLES</h3>
+                <div class="interactables-grid" id="discovered-interactables">
+                    @foreach (var interactable in Model.DiscoveredInteractables)
+                    {
+                        <button class="interactable-btn @(interactable.IsKeyItem ? "key-item" : "")"
+                                onclick="interact('@interactable.Id')">
+                            <span class="interactable-name">@interactable.Name</span>
+                            <span class="interactable-action">@interactable.Action</span>
+                        </button>
+                    }
+                </div>
+                @if (!Model.DiscoveredInteractables.Any())
+                {
+                    <div class="no-discoveries-hint">
+                        <span class="hint-icon">👁</span>
+                        <span class="hint-text">Explore the environment to discover interactables...</span>
+                    </div>
+                }
+            </div>
+        </section>
+
+        <!-- Right Panel: Navigation & Info -->
+        <aside class="right-panel">
+            <!-- Threat Level -->
+            <div class="panel-section">
+                <h3 class="panel-title">THREAT LEVEL</h3>
+                <div class="threat-indicator @GetThreatClass(Model.ThreatLevel)">
+                    <span class="threat-icon">@GetThreatIcon(Model.ThreatLevel)</span>
+                    <span class="threat-text">@Model.ThreatLevel</span>
+                </div>
+            </div>
+
+            <!-- Atmosphere Info -->
+            <div class="panel-section">
+                <h3 class="panel-title">ENVIRONMENT</h3>
+                <div class="env-info">
+                    <div class="env-item">
+                        <span class="env-label">ATMOSPHERE</span>
+                        <span class="env-value">@Model.Atmosphere</span>
+                    </div>
+                    <div class="env-item">
+                        <span class="env-label">BIOME</span>
+                        <span class="env-value">@Model.Biome</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="panel-section">
+                <h3 class="panel-title">NAVIGATION</h3>
+                <div class="exits-list">
+                    @foreach (var exit in Model.AvailableExits)
+                    {
+                        <form asp-action="Move" asp-controller="Game" method="post" class="exit-form">
+                            <input type="hidden" name="characterId" value="@Model.CharacterId" />
+                            <input type="hidden" name="targetLocationId" value="@exit.TargetLocationId" />
+                            <button type="submit" class="exit-btn @(exit.IsAvailable ? "" : "disabled")">
+                                <span class="exit-direction">@exit.Direction</span>
+                                <span class="exit-description">@exit.Description</span>
+                            </button>
+                        </form>
+                    }
+                </div>
+            </div>
+
+            <!-- Recent Actions -->
+            @if (Model.RecentActions.Any())
+            {
+                <div class="panel-section">
+                    <h3 class="panel-title">LOG</h3>
+                    <div class="action-log">
+                        @foreach (var action in Model.RecentActions)
+                        {
+                            <div class="log-entry">> @action</div>
+                        }
+                    </div>
+                </div>
+            }
+        </aside>
+    </main>
+
+    <!-- Footer -->
+    <footer class="game-footer">
+        <div class="footer-coordinates">
+            <span>SECTOR: UNKNOWN</span>
+            <span>|</span>
+            <span>STATUS: ABANDONED</span>
+            <span>|</span>
+            <span>DAY: 47</span>
+        </div>
+    </footer>
+</div>
+
+@functions {
+    string FormatBeatName(StoryBeat beat)
+    {
+        return beat switch
+        {
+            StoryBeat.WakeUp => "WAKE UP",
+            StoryBeat.FirstDiscovery => "FIRST DISCOVERY",
+            StoryBeat.MOTHERContact => "MOTHER CONTACT",
+            StoryBeat.FirstEncounter => "FIRST ENCOUNTER",
+            StoryBeat.MidpointRevelation => "REVELATION",
+            StoryBeat.TheChoice => "THE CHOICE",
+            StoryBeat.Consequences => "CONSEQUENCES",
+            StoryBeat.CrisisPoint => "CRISIS POINT",
+            StoryBeat.Climax => "CLIMAX",
+            StoryBeat.Resolution => "RESOLUTION",
+            _ => beat.ToString().ToUpper()
+        };
+    }
+
+    string GetItemIcon(ItemType type) => type switch
+    {
+        ItemType.Weapon => "⚔",
+        ItemType.Tool => "🔧",
+        ItemType.Medical => "💊",
+        ItemType.Keycard => "🗝",
+        ItemType.Recording => "📼",
+        _ => "📦"
+    };
+
+    string GetThreatClass(ThreatLevel level) => level switch
+    {
+        ThreatLevel.Clear => "clear",
+        ThreatLevel.Unknown => "unknown",
+        ThreatLevel.Disturbance => "disturbance",
+        ThreatLevel.Contact => "contact",
+        ThreatLevel.ActiveHunt => "hunt",
+        ThreatLevel.Critical => "critical",
+        _ => "unknown"
+    };
+
+    string GetThreatIcon(ThreatLevel level) => level switch
+    {
+        ThreatLevel.Clear => "✓",
+        ThreatLevel.Unknown => "?",
+        ThreatLevel.Disturbance => "!",
+        ThreatLevel.Contact => "⚠",
+        ThreatLevel.ActiveHunt => "☠",
+        ThreatLevel.Critical => "☢",
+        _ => "?"
+    };
+
+    string FormatNarrative(string text)
+    {
+        if (string.IsNullOrEmpty(text)) return "";
+        
+        // Convert newlines and double newlines to proper HTML paragraphs
+        var paragraphs = text.Split(new[] { "\n\n", "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+        if (paragraphs.Length == 1)
+        {
+            // Single paragraph - wrap it
+            return $"<p>{text.Replace("\n", "<br/>")}</p>";
+        }
+        
+        // Multiple paragraphs
+        return string.Join("", paragraphs.Select(p => $"<p>{p.Trim().Replace("\n", "<br/>")}</p>"));
+    }
+}
+
+@section Scripts {
+    <script src="~/js/loading.js"></script>
+    <script src="~/js/modal.js"></script>
+    <script src="~/js/discovery.js"></script>
+    <script>
+        // Initialize modal and discovery manager
+        const gameModal = new GameModal();
+        const discoveryManager = new DiscoveryManager(@Model.CharacterId, @Model.LocationId);
+        discoveryManager.init();
+        
+        // Track if we're currently recording a discovery (prevent duplicates)
+        let recordingDiscovery = false;
+        
+        // Track which discoveries have already been shown (persist in localStorage)
+        const shownDiscoveriesKey = `signal_shown_discoveries_${@Model.CharacterId}`;
+        
+        function getShownDiscoveries() {
+            try {
+                const stored = localStorage.getItem(shownDiscoveriesKey);
+                return stored ? new Set(JSON.parse(stored)) : new Set();
+            } catch (e) {
+                return new Set();
+            }
+        }
+        
+        function saveShownDiscovery(clueId) {
+            try {
+                const shown = getShownDiscoveries();
+                shown.add(clueId);
+                localStorage.setItem(shownDiscoveriesKey, JSON.stringify(Array.from(shown)));
+            } catch (e) {
+                console.error('Failed to save shown discovery:', e);
+            }
+        }
+        
+        async function recordDiscovery(clueId, title, description) {
+            if (recordingDiscovery) return;
+            
+            // Check if this discovery has already been shown
+            const shown = getShownDiscoveries();
+            if (shown.has(clueId)) return;
+            
+            recordingDiscovery = true;
+            
+            try {
+                const response = await fetch('/api/discovery/record', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        characterId: @Model.CharacterId,
+                        clueId: clueId,
+                        title: title,
+                        description: description
+                    })
+                });
+                
+                if (response.ok) {
+                    gameModal.showDiscovery(title, description);
+                    saveShownDiscovery(clueId);
+                    
+                    // Update action log dynamically
+                    if (typeof discoveryManager !== 'undefined') {
+                        discoveryManager.addToActionLog(`Discovered: ${title}`);
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to record discovery:', error);
+            } finally {
+                recordingDiscovery = false;
+            }
+        }
+        
+        function interact(interactableId) {
+            console.log('Interacting with:', interactableId);
+            
+            switch(interactableId) {
+                case 'audio_log_jennings':
+                case 'personal_log_recorder':
+                    // Navigate to audio log page
+                    window.location.href = `/AudioLog/Play?characterId=${@Model.CharacterId}&logId=1`;
+                    break;
+                    
+                case 'jennings_workstation':
+                    gameModal.show({
+                        title: "JENNINGS' WORKSTATION",
+                        content: `<p>Accessing personal logs...</p>
+                                 <p><strong>Last Entry Found:</strong></p>
+                                 <p style="font-style: italic; color: #f0883e;">"Sorry, Holt. Had to borrow your protocols. Had to understand how to integrate it properly. You would have done the same. You'll see. - Jennings"</p>
+                                 <p><strong>Analysis:</strong> Handwritten alterations to power grid schematics. Crystal integration patterns documented. This was written 3 days before full transformation.</p>`,
+                        type: 'terminal',
+                        icon: '💻',
+                        onClose: () => recordDiscovery('jennings_message', "Jennings' Last Message", "Jennings apologized for borrowing protocols and mentioned integration")
+                    });
+                    break;
+                    
+                case 'engineering_terminal':
+                    gameModal.show({
+                        title: "ENGINEERING TERMINAL",
+                        content: `<p><strong>SYSTEM DIAGNOSTICS</strong></p>
+                                 <p>Power routing has been modified beyond standard protocols. Unauthorized changes detected in:</p>
+                                 <ul>
+                                   <li>Primary reactor conduits (redirected)</li>
+                                   <li>Cooling system loops (optimized)</li>
+                                   <li>Life support distribution (minimal draw)</li>
+                                 </ul>
+                                 <p><strong style="color: #f0883e;">ALERT:</strong> Crystal formations integrated with reactor systems. Efficiency up 12%. Source unknown.</p>
+                                 <p><strong>Personnel Note:</strong> Jennings, M. - Accessed terminal 47 times in 14 days. Last login: 3 days ago.</p>`,
+                        type: 'terminal',
+                        icon: '🖥',
+                        onClose: () => recordDiscovery('system_modified', 'Modified Systems', 'Power routing deliberately altered by Jennings for crystal integration')
+                    });
+                    break;
+                    
+                case 'cryo_terminal':
+                    gameModal.show({
+                        title: "CRYO-POD TERMINAL",
+                        content: `<p><strong>REVIVAL LOG</strong></p>
+                                 <p>Your pod was triggered remotely 4 hours ago.</p>
+                                 <p><strong>Source:</strong> Unknown automated protocol</p>
+                                 <p><strong>Fingerprint Analysis:</strong> Smudged handprints detected on manual override panel. Size analysis suggests small hands - possibly child or small adult.</p>
+                                 <p><strong>Note:</strong> Override was used recently, within last 24 hours.</p>`,
+                        type: 'terminal',
+                        icon: '📊',
+                        onClose: () => recordDiscovery('cryo_override', 'Cryo Override', 'Someone with small hands triggered manual revival protocol')
+                    });
+                    break;
+                    
+                case 'emergency_locker':
+                    gameModal.show({
+                        title: "EMERGENCY LOCKER",
+                        content: `<p><strong>CONTENTS SECURED:</strong></p>
+                                 <ul>
+                                   <li>🔧 Standard engineering toolkit (intact)</li>
+                                   <li>💊 Emergency oxygen mask (2 hours supply)</li>
+                                   <li>🗝 Maintenance access codes (functional)</li>
+                                   <li>📋 Emergency protocol handbook</li>
+                                 </ul>
+                                 <p><strong>Status:</strong> All items present. No signs of tampering.</p>`,
+                        type: 'terminal',
+                        icon: '🎒'
+                    });
+                    break;
+                    
+                case 'damaged_pod':
+                    gameModal.show({
+                        title: "DAMAGED CRYO-POD",
+                        content: `<p><strong>POD INTEGRITY:</strong> COMPROMISED</p>
+                                 <p>The pod was cracked open from the <strong>inside</strong>.</p>
+                                 <p><strong>Evidence:</strong></p>
+                                 <ul>
+                                   <li>Claw marks scoring the metal rim</li>
+                                   <li>Sealing mechanism torn outward</li>
+                                   <li>Something thick and dark dried on floor</li>
+                                 </ul>
+                                 <p><strong>DNA Analysis:</strong> <span style="color: #da3633;">Inconclusive</span> - Material shows cellular structures not matching human baseline.</p>
+                                 <p><strong>Identification:</strong> Pod assigned to Crewman Vasquez, J. Status: UNKNOWN</p>`,
+                        type: 'danger',
+                        icon: '⚠',
+                        onClose: () => recordDiscovery('damaged_pod_clue', 'Damaged Pod Mystery', 'Pod opened from inside with non-human biological traces')
+                    });
+                    break;
+                    
+                case 'crystal_formations':
+                    gameModal.show({
+                        title: "CRYSTAL FORMATIONS",
+                        content: `<p><strong>SPECTRAL ANALYSIS</strong></p>
+                                 <p>Emitting harmonic frequencies that match reactor pulse cycle. Resonance detected at 7.83 Hz - Earth's Schumann frequency.</p>
+                                 <p><strong>Growth Pattern:</strong></p>
+                                 <ul>
+                                   <li>Following electromagnetic field lines</li>
+                                   <li>Growing toward power sources</li>
+                                   <li>Integration with circuit panels at cellular level</li>
+                                 </ul>
+                                 <p><strong>Assessment:</strong> Not natural growth. Deliberately cultivated using advanced materials science.</p>
+                                 <p><strong>Your Engineering Knowledge:</strong> This matches no known construction technique. Someone taught the crystals <em>how</em> to grow.</p>`,
+                        type: 'warning',
+                        icon: '💎',
+                        onClose: () => recordDiscovery('crystals_analyzed', 'Crystal Analysis', 'Crystals are engineered, following power lines and integrated with systems')
+                    });
+                    break;
+                    
+                default:
+                    gameModal.show({
+                        title: "EXAMINE",
+                        content: `<p>You examine the ${interactableId.replace(/_/g, ' ')} carefully but find nothing of immediate use.</p>`,
+                        type: 'terminal',
+                        icon: '🔍'
+                    });
+            }
+        }
+    </script>
+}

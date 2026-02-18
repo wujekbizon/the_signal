@@ -5,6 +5,7 @@
 }
 
 <link rel="stylesheet" href="~/css/character-creation.css" />
+<link rel="stylesheet" href="~/css/loading.css" />
 
 <div class="landing-wrapper">
     <!-- Atmospheric Background -->
@@ -24,7 +25,7 @@
         <header class="char-creation-header">
             <div class="system-badge">
                 <span class="badge-indicator"></span>
-                <span class="badge-text">PERSONNEL FILE // NEW RECRUIT</span>
+                <span class="badge-text">CRYO-POD // REVIVAL PROTOCOL</span>
             </div>
             <div class="coordinates">
                 <span>SESSION: CHAR_CREATE_01</span>
@@ -98,7 +99,6 @@
 
                             </div>
                             <!-- end .char-bio-spec-column -->
-
                             <!-- ROW 2, FULL WIDTH: Stats -->
                             <div class="class-stats">
                                 <div class="stats-grid">
@@ -151,7 +151,6 @@
 
                         </div>
                         <!-- end .char-content-wrapper -->
-
                         <!-- Nickname Input -->
                         <div class="terminal-form-group mt-lg">
                             <label class="terminal-label">CALLSIGN / NICKNAME</label>
@@ -166,7 +165,7 @@
                         <div class="char-actions mt-lg">
                             <button class="terminal-btn primary large" id="start-mission-btn">
                                 <span class="btn-icon">▶</span>
-                                <span>DEPLOY TO MISSION</span>
+                                <span>WAKE UP</span>
                             </button>
                         </div>
 
@@ -203,4 +202,5 @@
 <script>
     window.classData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Classes));
 </script>
+<script src="~/js/loading.js"></script>
 <script src="~/js/character-creation.js"></script>

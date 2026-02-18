@@ -1,4 +1,5 @@
 using TheSignal.Models.Entities;
+using TheSignal.Models.GameData;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,6 +27,14 @@ public class ApplicationDbContext : IdentityDbContext
     public DbSet<CharacterQuest> CharacterQuests { get; set; }
     
     public DbSet<GeneratedNarrative> GeneratedNarratives { get; set; }
+    public DbSet<AudioLog> AudioLogs { get; set; }
+    
+    // AI Dungeon Master System
+    public DbSet<ExplorationState> ExplorationStates { get; set; }
+    public DbSet<ProceduralRoom> ProceduralRooms { get; set; }
+    
+    // Discovery System
+    public DbSet<DiscoveredInteractable> DiscoveredInteractables { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -96,5 +105,49 @@ public class ApplicationDbContext : IdentityDbContext
             .WithMany()
             .HasForeignKey(gn => gn.LocationId)
             .OnDelete(DeleteBehavior.Cascade);
+        
+        // Configure ExplorationState relationships
+        modelBuilder.Entity<ExplorationState>()
+            .HasOne(es => es.Character)
+            .WithMany()
+            .HasForeignKey(es => es.CharacterId)
+            .OnDelete(DeleteBehavior.Cascade);
+        
+        modelBuilder.Entity<ExplorationState>()
+            .HasOne(es => es.PreviousRoom)
+            .WithMany()
+            .HasForeignKey(es => es.PreviousRoomId)
+            .OnDelete(DeleteBehavior.SetNull);
+        
+        modelBuilder.Entity<ExplorationState>()
+            .HasIndex(es => es.CharacterId)
+            .IsUnique();
+        
+        // Configure ProceduralRoom relationships
+        modelBuilder.Entity<ProceduralRoom>()
+            .HasOne(pr => pr.Character)
+            .WithMany()
+            .HasForeignKey(pr => pr.CharacterId)
+            .OnDelete(DeleteBehavior.Cascade);
+        
+        modelBuilder.Entity<ProceduralRoom>()
+            .HasIndex(pr => new { pr.CharacterId, pr.ContextHash });
+        
+        modelBuilder.Entity<ProceduralRoom>()
+            .HasIndex(pr => pr.LastVisitedAt);
+        
+        // Configure DiscoveredInteractable relationships
+        modelBuilder.Entity<DiscoveredInteractable>()
+            .HasOne(di => di.Character)
+            .WithMany(c => c.DiscoveredInteractables)
+            .HasForeignKey(di => di.CharacterId)
+            .OnDelete(DeleteBehavior.Cascade);
+        
+        modelBuilder.Entity<DiscoveredInteractable>()
+            .HasIndex(di => new { di.CharacterId, di.InteractableId })
+            .IsUnique();
+        
+        modelBuilder.Entity<DiscoveredInteractable>()
+            .HasIndex(di => di.LocationId);
     }
 }

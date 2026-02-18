@@ -1,0 +1,110 @@
+@model TheSignal.Controllers.AudioLogListViewModel
+@{
+    ViewData["Title"] = "Audio Log Archive";
+    ViewData["HideNavigation"] = true;
+}
+
+<link rel="stylesheet" href="~/css/audio-logs.css" />
+
+<div class="archive-container">
+    <!-- CRT Effects -->
+    <div class="crt-overlay"></div>
+    <div class="scanlines"></div>
+
+    <!-- Header -->
+    <header class="archive-header">
+        <div class="header-left">
+            <a href="@Url.Action("Index", "Game", new { characterId = Model.CharacterId })" class="nav-btn back">
+                <span class="nav-icon">←</span>
+                <span class="nav-text">RETURN TO GAME</span>
+            </a>
+        </div>
+        <div class="header-center">
+            <div class="archive-title">
+                <span class="title-icon">📼</span>
+                <div class="title-text">
+                    <span class="title-main">AUDIO LOG ARCHIVE</span>
+                    <span class="title-sub">PERSONAL RECORDINGS DATABASE</span>
+                </div>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="discovery-counter">
+                <span class="counter-label">DISCOVERED</span>
+                <span class="counter-value">
+                    <span class="count-current">@Model.DiscoveredLogs.Count</span>
+                    <span class="count-separator">/</span>
+                    <span class="count-total">@Model.TotalLogs</span>
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="archive-content">
+        @if (!Model.DiscoveredLogs.Any())
+        {
+            <div class="empty-archive">
+                <div class="empty-visual">
+                    <div class="static-lines"></div>
+                    <div class="empty-icon">📻</div>
+                    <div class="static-lines"></div>
+                </div>
+                <div class="empty-message">
+                    <h2>SIGNAL NOT FOUND</h2>
+                    <p>No audio recordings have been discovered yet.</p>
+                    <div class="empty-hint">
+                        <span class="hint-icon">💡</span>
+                        <span class="hint-text">Explore the station to find personal logs and recordings left by the crew.</span>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="logs-grid">
+                @foreach (var log in Model.DiscoveredLogs.OrderBy(l => l.Day))
+                {
+                    <a href="@Url.Action("Play", "AudioLog", new { characterId = Model.CharacterId, logId = log.LogId })" 
+                       class="log-entry-card">
+                        <div class="card-header">
+                            <span class="log-day-badge">DAY @log.Day</span>
+                            <span class="log-type">PERSONAL LOG</span>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="log-title-text">@log.Title</h3>
+                            <div class="log-speaker">
+                                <span class="speaker-label">SPEAKER:</span>
+                                <span class="speaker-name">@log.Speaker</span>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="audio-status">
+                                <span class="status-icon">∿</span>
+                                <span class="status-text">TRANSCRIPT AVAILABLE</span>
+                            </div>
+                            <div class="discovery-time">
+                                <span class="time-icon">◷</span>
+                                <span class="time-text">@log.DiscoveredAt.ToString("MMM dd, HH:mm")</span>
+                            </div>
+                        </div>
+                    </a>
+                }
+            </div>
+        }
+
+        @if (Model.DiscoveredLogs.Count < Model.TotalLogs)
+        {
+            <div class="remaining-logs">
+                <div class="remaining-header">
+                    <span class="remaining-icon">🔒</span>
+                    <span class="remaining-title">UNDISCOVERED RECORDINGS</span>
+                </div>
+                <p class="remaining-count">
+                    <span class="count-number">@(@Model.TotalLogs - Model.DiscoveredLogs.Count)</span>
+                    <span class="count-label">recordings remain hidden throughout the station</span>
+                </p>
+            </div>
+        }
+    </main>
+</div>

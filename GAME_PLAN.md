@@ -1,5 +1,5 @@
 # AI-Powered Paragraph RPG - Architecture Plan
-## Project: "Chronicles of the Void"
+## Project: "The Signal"
 
 **Theme**: Sci-Fi Horror (Alien-inspired, event-driven narrative)
 
@@ -25,7 +25,7 @@
 **Decision**: Single project with clean folder separation (easier for learning, still follows Clean Architecture principles)
 
 ```
-ChroniclesOfTheVoid/
+TheSignal/
 ├── Controllers/              # HTTP handlers only
 │   ├── HomeController.cs    # Default scaffolded
 │   └── GameController.cs    # Main game flow
@@ -524,17 +524,17 @@ namespace ChroniclesOfTheVoid.Models.Enums;
 6. ✅ Phase 6 Complete (Game Controller)
 7. ✅ Phase 7a Complete (Landing Page UI)
 8. ✅ Phase 7b Complete (Character Creation UI)
-9. 🔄 Phase 7c: Archive/Progress View (IN PROGRESS)
-10. ⏳ Phase 7d: Game Session Views
-11. ⏳ Phase 8: Dependency Injection verification
+9. 🔄 Phase 9: AI Dungeon Master (IN PROGRESS)
+10. ⏳ Phase 7c: Archive/Progress View
+11. ⏳ Phase 7d: Game Session Views
 
-**Status**: AI backend complete. Working on UI flow: character creation → game session. MVC pattern with static game data + dynamic player state.
+**Status**: Implementing Phase 9 (AI-generated filler). Building a lethal, shifting station geometry without a visual map. Hazards integrated into text, stats visible in UI side panel.
 
 ---
 
-**Last Updated**: 2026-02-16
-**Current Phase**: Phase 7c - Archive/Progress View
-**Database**: SQLite (app.db) with 12 tables, Code-First approach
-**UI**: Dark sci-fi terminal theme with atmospheric effects
-**AI**: Gemini 2.5 Flash integrated, narrative generation with caching
-**Architecture**: Proper MVC - static definitions in code, player state in DB
+**Last Updated**: 2026-02-18
+**Current Phase**: Phase 9 - AI Dungeon Master
+**Database**: SQLite (app.db) with expanded map system entities
+**UI**: Dark sci-fi terminal theme with Player Stat side panel
+**AI**: Gemini Flash Dungeon Master, dynamic Hazards, and TwistLevels
+**Architecture**: Proper MVC - Data-driven Map Registry in DB

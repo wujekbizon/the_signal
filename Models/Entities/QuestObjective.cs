@@ -4,6 +4,7 @@ public class QuestObjective
 {
     public int Id { get; set; }
     public int QuestId { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore]
     public Quest? Quest { get; set; }
     
     public int OrderIndex { get; set; }

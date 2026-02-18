@@ -1,0 +1,148 @@
+@model TheSignal.Models.ViewModels.GameSessionViewModel
+@using TheSignal.Models.Enums
+@{
+    ViewData["Title"] = "The Signal - Exploring " + Model.ProceduralRoom?.GapType;
+    ViewData["HideNavigation"] = true;
+}
+
+<link rel="stylesheet" href="~/css/game-session.css" />
+<link rel="stylesheet" href="~/css/exploration.css" />
+
+<div class="game-container">
+    <div class="atmosphere-container">
+        <div class="static-overlay"></div>
+        <div class="scanlines"></div>
+        <div class="twist-overlay twist-level-@Model.TwistLevel"></div>
+    </div>
+
+    <header class="game-header">
+        <div class="header-left">
+            <div class="character-badge">
+                <span class="class-icon">⚙</span>
+                <span class="character-name">@Model.CharacterName</span>
+                <span class="character-class">@Model.CharacterClass</span>
+            </div>
+        </div>
+        <div class="header-center">
+            <div class="location-badge">
+                <span class="location-label">EXPLORING</span>
+                <span class="location-name">@Model.ProceduralRoom?.GapType</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="story-beat">
+                <span class="beat-label">PROGRESS</span>
+                <span class="beat-name">@Model.RemainingGapSteps STEPS REMAINING</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="game-main">
+        <aside class="left-panel">
+            <div class="panel-section">
+                <h3 class="panel-title">VITAL SIGNS</h3>
+                <div class="stat-bar-container">
+                    <div class="stat-row">
+                        <span class="stat-label">HEALTH</span>
+                        <div class="stat-bar-bg">
+                            <div class="stat-bar-fill health" style="width: @(Model.Health)%"></div>
+                        </div>
+                        <span class="stat-value">@Model.Health/@Model.MaxHealth</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">OXYGEN</span>
+                        <div class="stat-bar-bg">
+                            <div class="stat-bar-fill oxygen" style="width: @(Model.Oxygen)%"></div>
+                        </div>
+                        <span class="stat-value">@Model.Oxygen/@Model.MaxOxygen</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">SANITY</span>
+                        <div class="stat-bar-bg">
+                            <div class="stat-bar-fill sanity" style="width: @(Model.Sanity)%"></div>
+                        </div>
+                        <span class="stat-value">@Model.Sanity/@Model.MaxSanity</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h3 class="panel-title">TWIST LEVEL</h3>
+                <div class="twist-meter">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        <div class="twist-segment @(i <= Model.TwistLevel ? "active" : "")"></div>
+                    }
+                </div>
+                <p class="twist-warning">@(Model.TwistLevel > 0 ? "The Signal is distorting reality..." : "Reality remains stable.")</p>
+            </div>
+        </aside>
+
+        <section class="center-panel">
+            <div class="narrative-box exploration-narrative">
+                <div class="narrative-header">
+                    <span class="pulse-indicator"></span>
+                    <span>@Model.ProceduralRoom?.Name.ToUpper()</span>
+                </div>
+                <div class="narrative-content">
+                    <p class="room-description">@Model.ProceduralRoom?.Description</p>
+                    <div class="sensory-details">
+                        <p class="audio-detail"><span class="icon">🔊</span> @Model.ProceduralRoom?.AudioDescription</p>
+                        <p class="env-detail"><span class="icon">🌡</span> @Model.ProceduralRoom?.EnvironmentalDescription</p>
+                    </div>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.ProceduralRoom?.DiscoveryClue))
+            {
+                <div class="discovery-box">
+                    <div class="discovery-header">NEW DISCOVERY</div>
+                    <div class="discovery-content">@Model.ProceduralRoom.DiscoveryClue</div>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.ProceduralRoom?.FoundItemName))
+            {
+                <div class="discovery-box boon">
+                    <div class="discovery-header">RESOURCES FOUND</div>
+                    <div class="discovery-content">You found: @Model.ProceduralRoom.FoundItemName</div>
+                </div>
+            }
+        </section>
+
+        <aside class="right-panel">
+            <div class="panel-section">
+                <h3 class="panel-title">NAVIGATION</h3>
+                <div class="exits-list">
+                    <form asp-action="MoveInGap" asp-controller="Game" method="post" class="exit-form">
+                        <input type="hidden" name="characterId" value="@Model.CharacterId" />
+                        <input type="hidden" name="moveForward" value="true" />
+                        <button type="submit" class="exit-btn">
+                            <span class="exit-direction">FORWARD</span>
+                            <span class="exit-description">Continue toward destination</span>
+                        </button>
+                    </form>
+
+                    <form asp-action="MoveInGap" asp-controller="Game" method="post" class="exit-form">
+                        <input type="hidden" name="characterId" value="@Model.CharacterId" />
+                        <input type="hidden" name="moveForward" value="false" />
+                        <button type="submit" class="exit-btn danger">
+                            <span class="exit-direction">BACKTRACK</span>
+                            <span class="exit-description">Return the way you came</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h3 class="panel-title">LOG</h3>
+                <div class="action-log">
+                    @foreach (var action in Model.RecentActions.TakeLast(5))
+                    {
+                        <div class="log-entry">> @action</div>
+                    }
+                </div>
+            </div>
+        </aside>
+    </main>
+</div>

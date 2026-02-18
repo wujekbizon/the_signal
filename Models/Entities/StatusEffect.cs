@@ -6,6 +6,7 @@ public class StatusEffect
 {
     public int Id { get; set; }
     public int CharacterId { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore]
     public Character? Character { get; set; }
     
     public string Name { get; set; } = string.Empty;

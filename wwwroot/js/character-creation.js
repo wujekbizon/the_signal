@@ -79,10 +79,37 @@ function startMission() {
     }
 
     const selectedClass = window.classData[selectedClassIndex];
-    console.log('Character:', { nickname, class: selectedClass.Type });
-    alert(`Character created: "${nickname}" - ${selectedClass.Name}`);
-
-    // TODO: POST to server
+    
+    // Show loading overlay
+    const loader = new LoadingOverlay();
+    loader.show('WAKING UP...', `Initializing cryo-pod revival protocols for ${nickname}...`);
+    
+    // Create a form and submit it normally (preserves TempData)
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/Game/CreateCharacter';
+    
+    const nameInput = document.createElement('input');
+    nameInput.type = 'hidden';
+    nameInput.name = 'name';
+    nameInput.value = nickname;
+    form.appendChild(nameInput);
+    
+    const classInput = document.createElement('input');
+    classInput.type = 'hidden';
+    classInput.name = 'characterClass';
+    classInput.value = selectedClass.Type;
+    form.appendChild(classInput);
+    
+    document.body.appendChild(form);
+    
+    // Small delay to show loading animation
+    setTimeout(() => {
+        loader.update('REVIVING...', 'Restoring consciousness from emergency stasis...');
+        setTimeout(() => {
+            form.submit();
+        }, 600);
+    }, 400);
 }
 
 function handleKeyboard(e) {

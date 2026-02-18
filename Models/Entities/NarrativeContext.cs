@@ -18,6 +18,7 @@ public class NarrativeContext
     public List<string> WorldEvents { get; set; } = new();
     public HorrorEventType LastEvent { get; set; }
     
+    public int StartingLocationId { get; set; }
     public int CharacterId { get; set; }
     public string CharacterName { get; set; } = string.Empty;
     public int HealthPercent => MaxHealth > 0 ? (Health * 100) / MaxHealth : 100;
@@ -72,7 +73,44 @@ public class NarrativeContext
                 .ToList(),
             RecentActions = character.RecentActions.TakeLast(3).ToList(),
             DiscoveredClues = character.DiscoveredClues,
+            StartingLocationId = character.StartingLocationId,
             CurrentMood = DetermineMood(character, location, threat)
+        };
+    }
+    
+    public static NarrativeContext CreateWithBeat(Location location, Character character, 
+        StoryBeat currentBeat, List<string>? worldEvents = null)
+    {
+        return new NarrativeContext
+        {
+            LocationId = location.Id,
+            LocationName = location.Name,
+            LocationBaseDescription = location.BaseDescription,
+            Biome = location.Biome,
+            LocationKeyElements = location.KeyElements,
+            CurrentTime = location.DefaultTime,
+            CurrentAtmosphere = location.DefaultAtmosphere,
+            CurrentThreat = location.ThreatLevel,
+            WorldEvents = worldEvents ?? new List<string>(),
+            CharacterId = character.Id,
+            CharacterName = character.Name,
+            Health = character.Health,
+            MaxHealth = character.MaxHealth,
+            Sanity = character.Sanity,
+            MaxSanity = character.MaxSanity,
+            ActiveStatusEffects = character.ActiveEffects.Select(e => e.Name).ToList(),
+            KeyInventoryItems = character.Inventory
+                .Where(i => i.Item?.IsQuestItem == true)
+                .Select(i => i.Item!.Name)
+                .ToList(),
+            ActiveQuestTitles = character.Quests
+                .Where(q => q.Status == QuestStatus.Active)
+                .Select(q => q.Quest?.Title ?? "Unknown")
+                .ToList(),
+            RecentActions = character.RecentActions.TakeLast(3).ToList(),
+            DiscoveredClues = character.DiscoveredClues,
+            StartingLocationId = character.StartingLocationId,
+            CurrentMood = DetermineMood(character, location, location.ThreatLevel)
         };
     }
     

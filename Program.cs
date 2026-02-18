@@ -26,8 +26,30 @@ builder.Services.AddScoped<ICharacterRepository, CharacterRepository>();
 // Register Services
 builder.Services.AddScoped<IGeminiClient, GeminiClient>();
 builder.Services.AddScoped<INarrativeService, NarrativeService>();
+builder.Services.AddScoped<INarrativeParserService, NarrativeParserService>();
+builder.Services.AddScoped<IStartingScenarioService, StartingScenarioService>();
+builder.Services.AddScoped<IGameSessionService, GameSessionService>();
+builder.Services.AddScoped<IStoryProgressionService, StoryProgressionService>();
+builder.Services.AddScoped<IExplorationService, ExplorationService>();
+builder.Services.AddScoped<ScenarioSeeder>();
 
 var app = builder.Build();
+
+// Seed the database
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var seeder = services.GetRequiredService<ScenarioSeeder>();
+        await seeder.SeedAsync();
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while seeding the database.");
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

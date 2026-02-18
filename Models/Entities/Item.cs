@@ -14,4 +14,5 @@ public class Item
     public int? Damage { get; set; }
     public int? Defense { get; set; }
     public int? UsesRemaining { get; set; }
+    public string? Effect { get; set; }
 }

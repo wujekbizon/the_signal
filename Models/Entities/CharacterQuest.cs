@@ -6,6 +6,7 @@ public class CharacterQuest
 {
     public int Id { get; set; }
     public int CharacterId { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore]
     public Character? Character { get; set; }
     
     public int QuestId { get; set; }

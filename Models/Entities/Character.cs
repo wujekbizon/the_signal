@@ -1,4 +1,5 @@
 using TheSignal.Models.Enums;
+using TheSignal.Models.GameData;
 
 namespace TheSignal.Models.Entities;
 
@@ -10,6 +11,7 @@ public class Character
     
     public int CurrentLocationId { get; set; }
     public Location? CurrentLocation { get; set; }
+    public int StartingLocationId { get; set; }
     
     public int Level { get; set; } = 1;
     public int Experience { get; set; }
@@ -28,11 +30,15 @@ public class Character
     public int Stealth { get; set; } = 10;
     public int Leadership { get; set; } = 10;
     
+    public StoryBeat CurrentStoryBeat { get; set; } = StoryBeat.WakeUp;
+    
     public List<InventoryItem> Inventory { get; set; } = new();
     public List<StatusEffect> ActiveEffects { get; set; } = new();
     public List<CharacterQuest> Quests { get; set; } = new();
     public List<string> DiscoveredClues { get; set; } = new();
     public List<string> RecentActions { get; set; } = new();
+    public List<AudioLog> DiscoveredLogs { get; set; } = new();
+    public List<DiscoveredInteractable> DiscoveredInteractables { get; set; } = new();
     
     public int Credits { get; set; }
     

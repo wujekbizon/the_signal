@@ -1,0 +1,67 @@
+@{
+    ViewData["Title"] = "CONSUMED";
+    ViewData["HideNavigation"] = true;
+}
+
+<link rel="stylesheet" href="~/css/game-session.css" />
+<style>
+    .consumed-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #050505;
+        color: #da3633;
+        font-family: 'Courier New', Courier, monospace;
+        text-align: center;
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 4rem;
+        letter-spacing: 1rem;
+        margin-bottom: 2rem;
+        text-shadow: 0 0 10px #da3633;
+        animation: flicker 0.1s infinite;
+    }
+
+    .message {
+        font-size: 1.2rem;
+        max-width: 600px;
+        line-height: 1.6;
+        margin-bottom: 3rem;
+        color: #f0f0f0;
+    }
+
+    .retry-btn {
+        background-color: transparent;
+        border: 1px solid #da3633;
+        color: #da3633;
+        padding: 10px 30px;
+        font-size: 1.2rem;
+        text-decoration: none;
+        transition: all 0.3s;
+    }
+
+    .retry-btn:hover {
+        background-color: #da3633;
+        color: #050505;
+        box-shadow: 0 0 20px #da3633;
+    }
+
+    @@keyframes flicker {
+        0% { opacity: 0.8; }
+        50% { opacity: 1; }
+        100% { opacity: 0.9; }
+    }
+</style>
+
+<div class="consumed-container">
+    <h1>CONSUMED</h1>
+    <div class="message">
+        <p>The Signal has rewritten the architecture of your mind. Reality has folded, and you are no longer a distinct entity. You have harmonized with the station.</p>
+        <p>You are part of the Signal now.</p>
+    </div>
+    <a href="/" class="retry-btn">RETURN TO REALITY</a>
+</div>
