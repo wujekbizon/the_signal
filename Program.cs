@@ -19,6 +19,9 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
 
+// Add Health Checks
+builder.Services.AddHealthChecks();
+
 // Register Repositories
 builder.Services.AddScoped<ILocationRepository, LocationRepository>();
 builder.Services.AddScoped<ICharacterRepository, CharacterRepository>();
@@ -35,19 +38,22 @@ builder.Services.AddScoped<ScenarioSeeder>();
 
 var app = builder.Build();
 
-// Seed the database
-using (var scope = app.Services.CreateScope())
+// Seed the database only in Development
+if (app.Environment.IsDevelopment())
 {
-    var services = scope.ServiceProvider;
-    try
+    using (var scope = app.Services.CreateScope())
     {
-        var seeder = services.GetRequiredService<ScenarioSeeder>();
-        await seeder.SeedAsync();
-    }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while seeding the database.");
+        var services = scope.ServiceProvider;
+        try
+        {
+            var seeder = services.GetRequiredService<ScenarioSeeder>();
+            await seeder.SeedAsync();
+        }
+        catch (Exception ex)
+        {
+            var logger = services.GetRequiredService<ILogger<Program>>();
+            logger.LogError(ex, "An error occurred while seeding the database.");
+        }
     }
 }
 
@@ -77,5 +83,8 @@ app.MapControllerRoute(
 
 app.MapRazorPages()
    .WithStaticAssets();
+
+// Health check endpoint
+app.MapHealthChecks("/health");
 
 app.Run();

@@ -1,0 +1,16 @@
+bin/
+obj/
+*.db
+*.db-journal
+.env
+.vs/
+.vscode/
+*.user
+*.suo
+publish/
+out/
+.github/
+.git/
+.gitignore
+*.md
+!README.md
