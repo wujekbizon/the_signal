@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_NAME: thesignal-app
+  AZURE_WEBAPP_NAME: thesignal
   AZURE_WEBAPP_PACKAGE_PATH: './publish'
   DOTNET_VERSION: '8.0.x'
 
