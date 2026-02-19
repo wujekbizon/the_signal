@@ -38,22 +38,22 @@ builder.Services.AddScoped<ScenarioSeeder>();
 
 var app = builder.Build();
 
-// Seed the database only in Development
-if (app.Environment.IsDevelopment())
+// Apply migrations and seed the database
+using (var scope = app.Services.CreateScope())
 {
-    using (var scope = app.Services.CreateScope())
+    var services = scope.ServiceProvider;
+    try
     {
-        var services = scope.ServiceProvider;
-        try
-        {
-            var seeder = services.GetRequiredService<ScenarioSeeder>();
-            await seeder.SeedAsync();
-        }
-        catch (Exception ex)
-        {
-            var logger = services.GetRequiredService<ILogger<Program>>();
-            logger.LogError(ex, "An error occurred while seeding the database.");
-        }
+        var context = services.GetRequiredService<ApplicationDbContext>();
+        await context.Database.MigrateAsync();
+        
+        var seeder = services.GetRequiredService<ScenarioSeeder>();
+        await seeder.SeedAsync();
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while migrating/seeding the database.");
     }
 }
 

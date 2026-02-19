@@ -98,7 +98,7 @@ Edit `.github/workflows/azure-deploy.yml`:
 
 ```yaml
 env:
-  AZURE_WEBAPP_NAME: thesignal-app-123  # <-- Change to your app name
+  AZURE_WEBAPP_NAME: thesignal
 ```
 
 ---
@@ -120,8 +120,8 @@ Or manually trigger:
 ## Step 7: Verify Deployment
 
 1. Check GitHub Actions tab for build status
-2. Once green, visit: `https://thesignal-app-123.azurewebsites.net`
-3. Check health: `https://thesignal-app-123.azurewebsites.net/health`
+2. Once green, visit: `https://thesignal.azurewebsites.net`
+3. Check health: `https://thesignal.azurewebsites.net/health`
 
 ---
 
